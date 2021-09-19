@@ -33,17 +33,17 @@ on_boot() {
 
 	# initialize system
 	echo_color 3 setting up loopback device...
-	/usr/sbin/ip link set up dev lo
+	ip link set up dev lo
 
 	echo_color 3 initializing udev...
 	if [ "$UDEV" = systemd ]; then
 		/usr/lib/systemd/systemd-udevd --daemon
-		/usr/bin/udevadm trigger --action=add --type=subsystems
-		/usr/bin/udevadm trigger --action=add --type=devices
+		udevadm trigger --action=add --type=subsystems
+		udevadm trigger --action=add --type=devices
 	elif [ "$UDEV" = eudev ]; then
-		/usr/bin/udevd --daemon
-		/usr/bin/udevadm trigger --action=add --type=subsystems
-		/usr/bin/udevadm trigger --action=add --type=devices
+		udevd --daemon
+		udevadm trigger --action=add --type=subsystems
+		udevadm trigger --action=add --type=devices
 	else # use busybox mdev as fallback:
 		busybox mdev -s
 		echo /sbin/mdev > /proc/sys/kernel/hotplug
@@ -115,7 +115,7 @@ default_start() {
 	iptables)
 		iptables-restore < /etc/iptables/iptables.rules;;
 	sshd)
-		/usr/bin/sshd;;  # requires an absolute path
+		$(command -v sshd);;  # sshd requires an absolute path, so grab path from command -v
 	privoxy)
 		privoxy --user privoxy.privoxy /etc/privoxy/config;;
 	polipo)
