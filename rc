@@ -14,8 +14,8 @@ read -r HOSTNAME </etc/hostname
 # User-definable start/stop/restart/poll functions which fall back to defaults
 custom_restart() { default_restart "$@"; }
 custom_start()   { default_start   "$@"; }
-custom_stop()    { default_stop	"$@"; }
-custom_poll()    { default_poll	"$@"; }
+custom_stop()    { default_stop    "$@"; }
+custom_poll()    { default_poll    "$@"; }
 
 . /etc/minirc.conf
 
