@@ -9,6 +9,7 @@ ENABLED="@syslog-ng @crond @dhcpcd @sshd"
 UDEV="busybox"
 NETWORK_INTERFACE="eth0"
 WIFI_INTERFACE="wlan0"
+INIT_LOG="/initlog"
 read -r HOSTNAME </etc/hostname
 
 # User-definable start/stop/restart/poll functions which fall back to defaults
@@ -30,6 +31,13 @@ on_boot() {
 	mkdir -p /dev/pts /dev/shm
 	mountpoint -q /dev/pts || mount -t devpts devpts /dev/pts -o mode=0620,gid=5,nosuid,noexec
 	mountpoint -q /dev/shm || mount -t tmpfs shm /dev/shm -o mode=1777,nosuid,nodev
+	mount -o remount,rw /
+	
+	echo_color 3 logging init to ${INIT_LOG}
+	set -x
+	touch "${INIT_LOG}"
+	exec 1>"${INIT_LOG}"
+	exec 2>&1
 
 	# initialize system
 	echo_color 3 setting up loopback device...
@@ -52,9 +60,8 @@ on_boot() {
 	echo_color 3 setting hostname...
 	echo "$HOSTNAME" >| /proc/sys/kernel/hostname
 
-	echo_color 3 mounting...
+	echo_color 3 mounting rest of filesystems...
 	mount -a
-	mount -o remount,rw /
 
 	# start the default daemons
 	echo_color 3 starting daemons...
