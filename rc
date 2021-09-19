@@ -115,7 +115,7 @@ default_start() {
 	iptables)
 		iptables-restore < /etc/iptables/iptables.rules;;
 	sshd)
-		$(command -v sshd);;  # sshd requires an absolute path, so grab path from command -v
+		eval "$(command -v sshd)";;  # sshd requires an absolute path, so grab path from command -v
 	privoxy)
 		privoxy --user privoxy.privoxy /etc/privoxy/config;;
 	polipo)
