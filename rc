@@ -10,6 +10,8 @@ UDEV="auto"
 NETWORK_INTERFACE="eth0"
 WIFI_INTERFACE="wlan0"
 INIT_LOG="/initlog"
+WAIT_POLL="0.1"
+WAIT_TRIES="50"
 read -r HOSTNAME </etc/hostname
 
 # User-definable start/stop/restart/poll functions which fall back to defaults
@@ -117,6 +119,10 @@ default_start() {
 			custom_poll "${dmn##@}" || custom_start "${dmn##@}"
 		done;;
 	alsa)
+		for i in $(seq "${WAIT_TRIES}"); do
+			[ -c /dev/snd/controlC0 ] && break
+			sleep "${WAIT_POLL}"
+		done
 		alsactl restore || alsactl --no-lock restore;;
 	bitlbee)
 		su -s /bin/sh -c 'bitlbee -F' bitlbee;;
@@ -135,9 +141,9 @@ default_start() {
 	dhcpcd)
 		if ip link | grep -Fq ${NETWORK_INTERFACE}; then :; else
 			echo_color 3 "waiting for ${NETWORK_INTERFACE} to settle..."
-			for i in $(seq 100); do
+			for i in $(seq "${WAIT_TRIES}"); do
 				ip link | grep -Fq ${NETWORK_INTERFACE} && break
-				sleep 1
+				sleep "${WAIT_POLL}"
 			done
 		fi
 		dhcpcd -nqb;;
@@ -148,6 +154,10 @@ default_start() {
 	ntpd)
 		ntpd -g -u ntp;;
 	wpa_supplicant)
+		for i in $(seq "${WAIT_TRIES}"); do
+			iwconfig ${WIFI_INTERFACE} && break
+			sleep "${WAIT_POLL}"
+		done
 		wpa_supplicant -Dwext -B -i"${WIFI_INTERFACE}" -c/etc/wpa_supplicant.conf;;
 	icecast)
 		icecast -b -c /etc/icecast.xml;;
