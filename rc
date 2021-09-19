@@ -17,6 +17,7 @@ custom_restart() { default_restart "$@"; }
 custom_start()   { default_start   "$@"; }
 custom_stop()    { default_stop    "$@"; }
 custom_poll()    { default_poll    "$@"; }
+# TODO: Add custom_exists and don't list daemons that don't exist on the system
 
 . /etc/minirc.conf
 
@@ -116,7 +117,7 @@ default_start() {
 			custom_poll "${dmn##@}" || custom_start "${dmn##@}"
 		done;;
 	alsa)
-		alsactl restore;;
+		alsactl restore || alsactl --no-lock restore;;
 	bitlbee)
 		su -s /bin/sh -c 'bitlbee -F' bitlbee;;
 	dbus)
@@ -164,7 +165,7 @@ default_stop() {
 			custom_poll "${dmn##@}" && custom_stop "${dmn##@}"
 		done;;
 	alsa)
-		alsactl store;;
+		alsactl store || alsactl --no-lock store;;
 	dbus)
 		killall dbus-launch
 		killall dbus-daemon
