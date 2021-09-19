@@ -5,8 +5,8 @@
 # Fallback Configuration Values, to be able to run even with a broken, deleted
 # or outdated minirc.conf:
 DAEMONS="syslog-ng iptables alsa crond dbus wpa_supplicant dhcpcd sshd privoxy polipo acpid mpd vsftpd lighttpd ntpd haveged"
-ENABLED="@syslog-ng @crond @dhcpcd @sshd"
-UDEV="busybox"
+ENABLED=""
+UDEV="auto"
 NETWORK_INTERFACE="eth0"
 WIFI_INTERFACE="wlan0"
 INIT_LOG="/initlog"
@@ -44,11 +44,15 @@ on_boot() {
 	ip link set up dev lo
 
 	echo_color 3 initializing udev...
-	if [ "${UDEV}" = systemd ]; then
-		/usr/lib/systemd/systemd-udevd --daemon
+	if [ "${UDEV}" = "auto" ]; then
+		command -v systemctl && UDEV="systemd" || { command -v udevd && UDEV="eudev" || UDEV="busybox"; }
+	fi
+	if [ "${UDEV}" = "systemd" ]; then
+		systemctl_path=$(command -v systemctl)
+		${systemctl_path%%systemctl}../lib/systemd/systemd-udevd --daemon
 		udevadm trigger --action=add --type=subsystems
 		udevadm trigger --action=add --type=devices
-	elif [ "${UDEV}" = eudev ]; then
+	elif [ "${UDEV}" = "eudev" ]; then
 		udevd --daemon
 		udevadm trigger --action=add --type=subsystems
 		udevadm trigger --action=add --type=devices
