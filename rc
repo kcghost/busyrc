@@ -24,10 +24,10 @@ on_boot() {
 	# mount the API filesystem
 	# /proc, /sys, /run, /dev, /run/lock, /dev/pts, /dev/shm
 	echo_color 3 mounting API filesystem...
-	mountpoint -q /proc	|| mount -t proc proc /proc -o nosuid,noexec,nodev
-	mountpoint -q /sys	 || mount -t sysfs sys /sys -o nosuid,noexec,nodev
-	mountpoint -q /run	 || mount -t tmpfs run /run -o mode=0755,nosuid,nodev
-	mountpoint -q /dev	 || mount -t devtmpfs dev /dev -o mode=0755,nosuid
+	mountpoint -q /proc  || mount -t proc proc /proc -o nosuid,noexec,nodev
+	mountpoint -q /sys   || mount -t sysfs sys /sys -o nosuid,noexec,nodev
+	mountpoint -q /run   || mount -t tmpfs run /run -o mode=0755,nosuid,nodev
+	mountpoint -q /dev   || mount -t devtmpfs dev /dev -o mode=0755,nosuid
 	mkdir -p /dev/pts /dev/shm
 	mountpoint -q /dev/pts || mount -t devpts devpts /dev/pts -o mode=0620,gid=5,nosuid,noexec
 	mountpoint -q /dev/shm || mount -t tmpfs shm /dev/shm -o mode=1777,nosuid,nodev
@@ -44,11 +44,11 @@ on_boot() {
 	ip link set up dev lo
 
 	echo_color 3 initializing udev...
-	if [ "$UDEV" = systemd ]; then
+	if [ "${UDEV}" = systemd ]; then
 		/usr/lib/systemd/systemd-udevd --daemon
 		udevadm trigger --action=add --type=subsystems
 		udevadm trigger --action=add --type=devices
-	elif [ "$UDEV" = eudev ]; then
+	elif [ "${UDEV}" = eudev ]; then
 		udevd --daemon
 		udevadm trigger --action=add --type=subsystems
 		udevadm trigger --action=add --type=devices
@@ -58,18 +58,18 @@ on_boot() {
 	fi
 
 	echo_color 3 setting hostname...
-	echo "$HOSTNAME" >| /proc/sys/kernel/hostname
+	echo "${HOSTNAME}" >| /proc/sys/kernel/hostname
 
 	echo_color 3 mounting rest of filesystems...
 	mount -a
 
 	# start the default daemons
 	echo_color 3 starting daemons...
-	for dmn in $ENABLED; do
-		if [ "$(echo "$dmn" | awk '{ s=substr($0, 1, 1); print s; }')" = '@' ]; then
-			custom_start "$(echo "$dmn" | awk '{ s=substr($0, 2); print s; }')" &
+	for dmn in ${ENABLED}; do
+		if [ "$(echo "${dmn}" | awk '{ s=substr($0, 1, 1); print s; }')" = '@' ]; then
+			custom_start "$(echo "${dmn}" | awk '{ s=substr($0, 2); print s; }')" &
 		else
-			custom_start "$dmn"
+			custom_start "${dmn}"
 		fi
 	done
 	
@@ -93,9 +93,9 @@ on_shutdown() {
 
 	# shut down udev
 	echo_color 3 shutting down udev...
-	if [ "$UDEV" = systemd ]; then
+	if [ "${UDEV}" = systemd ]; then
 		killall systemd-udevd
-	elif [ "$UDEV" = eudev ]; then
+	elif [ "${UDEV}" = eudev ]; then
 		killall udevd
 	fi
 
@@ -108,7 +108,7 @@ default_start() {
 	echo_color 2 starting "$1"...
 	case "$1" in
 	all)
-		for dmn in $DAEMONS $ENABLED; do
+		for dmn in ${DAEMONS} ${ENABLED}; do
 			custom_poll "${dmn##@}" || custom_start "${dmn##@}"
 		done;;
 	alsa)
@@ -128,10 +128,10 @@ default_start() {
 	polipo)
 		su -c 'polipo daemonise=true logFile="/var/log/polipo.log"' -s /bin/sh - nobody;;
 	dhcpcd)
-		if ip link | grep -Fq $NETWORK_INTERFACE; then :; else
-			echo_color 3 "waiting for $NETWORK_INTERFACE to settle..."
+		if ip link | grep -Fq ${NETWORK_INTERFACE}; then :; else
+			echo_color 3 "waiting for ${NETWORK_INTERFACE} to settle..."
 			for i in $(seq 100); do
-				ip link | grep -Fq $NETWORK_INTERFACE && break
+				ip link | grep -Fq ${NETWORK_INTERFACE} && break
 				sleep 1
 			done
 		fi
@@ -143,7 +143,7 @@ default_start() {
 	ntpd)
 		ntpd -g -u ntp;;
 	wpa_supplicant)
-		wpa_supplicant -Dwext -B -i"$WIFI_INTERFACE" -c/etc/wpa_supplicant.conf;;
+		wpa_supplicant -Dwext -B -i"${WIFI_INTERFACE}" -c/etc/wpa_supplicant.conf;;
 	icecast)
 		icecast -b -c /etc/icecast.xml;;
 	*)
@@ -156,7 +156,7 @@ default_stop() {
 	echo_color 1 stopping "$1"...
 	case "$1" in
 	all)
-		for dmn in $DAEMONS $ENABLED; do
+		for dmn in ${DAEMONS} ${ENABLED}; do
 			custom_poll "${dmn##@}" && custom_stop "${dmn##@}"
 		done;;
 	alsa)
@@ -203,7 +203,7 @@ default_poll() {
 echo_color() {
 	color="$1"
 	shift
-	printf "\033[1;3%sm%s\033[00m\n" "$color" "$*"
+	printf "\033[1;3%sm%s\033[00m\n" "${color}" "$*"
 }
 
 # handle arguments
@@ -220,23 +220,23 @@ start|stop|restart)
 	done;;
 ''|list)
 	# list all daemons and their status
-	for dmn in $DAEMONS; do
-		if custom_poll "$dmn" >/dev/null 2>&1; then
-			echo_color 2 [X] "$dmn"
+	for dmn in ${DAEMONS}; do
+		if custom_poll "${dmn}" >/dev/null 2>&1; then
+			echo_color 2 [X] "${dmn}"
 		else
-			echo_color 0 [ ] "$dmn"
+			echo_color 0 [ ] "${dmn}"
 		fi
 	done;;
 --version)
 	echo minirc 0.2;;
 *)
 	self=$(basename "$0")
-	echo "Usage: $self [--help] [--version] <action> [list of daemons]"
+	echo "Usage: ${self} [--help] [--version] <action> [list of daemons]"
 	echo
 	echo "Actions:"
-	echo "   $self list			   shows status of all daemons (default action)"
-	echo "   $self start [daemons]	starts daemons"
-	echo "   $self stop [daemons]	 stops daemons"
-	echo "   $self restart [daemons]  restarts daemons";;
+	echo "   ${self} list			   shows status of all daemons (default action)"
+	echo "   ${self} start [daemons]	starts daemons"
+	echo "   ${self} stop [daemons]	 stops daemons"
+	echo "   ${self} restart [daemons]  restarts daemons";;
 esac
 
