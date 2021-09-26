@@ -16,4 +16,3 @@ install:
 	install -Dm644 extra/_minirc $(DESTDIR)$(datadir)/zsh/site-functions/_minirc
 	install -Dm755 extra/shutdown.sh $(DESTDIR)$(sbindir)/shutdown
 	for i in init halt poweroff reboot; do ln -sf $$(which busybox) $(DESTDIR)$(sbindir)/$$i; done
-
