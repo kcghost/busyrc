@@ -1,34 +1,43 @@
 # This is an example /etc/inittab file for "busybox init" which starts
 # minirc on boot, creates TTY's and handles the killing of services on
 # shutdown.
-#
-# NOTE: you have to replace /sbin/rc in this file with whatever path
-# you placed the rc-script at.
+
+# Make sure 'rc' and other utilities are in PATH at boot, or use absolute paths
+# Default init PATH is: /usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin
+# Could be different if another init exported PATH before launching busybox
 
 # Start "rc init" on boot
-::sysinit:/sbin/rc init
+::sysinit:rc init
 
-# Set up the TTY's 1 through 4
-tty1::askfirst:/sbin/agetty -8 -s 38400 tty1 linux
-tty2::respawn:/sbin/agetty -8 -s 38400 tty2 linux
-tty3::respawn:/sbin/agetty -8 -s 38400 tty3 linux
-tty4::respawn:/sbin/agetty -8 -s 38400 tty4 linux
+# Setup login shells
+# You could use "-/bin/sh" for a direct login shell
+# or "agetty -a root tty1 linux" for autologin
+# A graphical display manager is traditionally launched on tty7
+# Login shells are normally launched on TTYs 1-6
+# But TTY1 has useful messages from the kernel and early init, so skip TTY1
+#tty1::respawn:agetty tty1 linux
+tty2::respawn:agetty tty2 linux
+tty3::respawn:agetty tty3 linux
+tty4::respawn:agetty tty4 linux
+tty5::respawn:agetty tty5 linux
+tty6::respawn:agetty tty6 linux
+#tty7::respawn:sddm
 
 # Shutdown when pressing CTRL+ALT+DEL (disabled by default)
-#::ctrlaltdel:/bin/kill -USR2 1
+#::ctrlaltdel:kill -USR2 1
 
 # Stop all services on shutdown
-::shutdown:/sbin/rc shutdown
+::shutdown:rc shutdown
 
 # Killing everything on shutdown
 ::shutdown:echo :: sending SIGTERM to all
-::shutdown:/bin/kill -s TERM -1
+::shutdown:kill -s TERM -1
 ::shutdown:sleep 1
 ::shutdown:echo :: sending SIGKILL to all
-::shutdown:/bin/kill -s KILL -1
+::shutdown:kill -s KILL -1
 
 # Unmount everything on shutdown
 ::shutdown:echo :: unmounting everything
-::shutdown:/bin/umount -a -r
-::shutdown:/bin/mount -o remount,ro /
+::shutdown:umount -a -r
+::shutdown:mount -o remount,ro /
 
