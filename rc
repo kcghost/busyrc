@@ -25,7 +25,9 @@ custom_stop()    { default_stop    "$@"; }
 custom_poll()    { default_poll    "$@"; }
 # TODO: Add custom_exists and don't list daemons that don't exist on the system
 
-. /etc/minirc.conf
+if [ -r /etc/minirc.conf ]; then
+	source /etc/minirc.conf
+fi
 
 on_boot() {
 	# mount the API filesystem
