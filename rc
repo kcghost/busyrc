@@ -72,8 +72,8 @@ on_boot() {
 	echo_color 3 setting hostname...
 	echo "${HOSTNAME}" >| /proc/sys/kernel/hostname
 
-	echo_color 3 mounting rest of filesystems...
-	mount -a
+	echo_color 3 setting fd link...	
+	ln -s /proc/self/fd /dev/fd
 
 	# start the default daemons
 	echo_color 3 starting daemons...
@@ -85,6 +85,12 @@ on_boot() {
 		fi
 	done
 	
+	echo_color 3 mounting rest of filesystems...
+	for i in $(seq "${WAIT_TRIES}"); do
+		mount -a && break
+		sleep "${WAIT_POLL}"
+	done
+
 	# load /etc/minirc.local
 	if [ -x /etc/minirc.local ]; then
 		echo_color 3 loading /etc/minirc.local...
