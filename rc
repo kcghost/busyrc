@@ -14,7 +14,6 @@ ENABLED=""
 UDEV="auto"
 NETWORK_INTERFACE="eth0"
 WIFI_INTERFACE="wlan0"
-INIT_LOG="/initlog"
 WAIT_POLL="0.1"
 WAIT_TRIES="50"
 read -r HOSTNAME </etc/hostname
@@ -41,10 +40,11 @@ on_boot() {
 	mountpoint -q /dev/shm || mount -t tmpfs shm /dev/shm -o mode=1777,nosuid,nodev
 	mount -o remount,rw /
 	
-	echo_color 3 logging init to ${INIT_LOG}
+	echo_color 3 logging init to /var/log/initlog
 	set -x
-	touch "${INIT_LOG}"
-	exec 1>"${INIT_LOG}"
+	mkdir -p /var/log
+	touch "/var/log/initlog"
+	exec 1>"/var/log/initlog"
 	exec 2>&1
 
 	# initialize system
