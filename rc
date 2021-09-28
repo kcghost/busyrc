@@ -8,6 +8,7 @@
 
 # Note: Preferable to use a busybox with:
 # FEATURE_SH_STANDALONE, FEATURE_PREFER_APPLETS, FEATURE_SH_NOFORK
+# In NixOS the shebang is automatically rewritten to use one with these features
 # Assume busybox ash shell features and prefer builtins or nofork applets
 
 PATH="$PATH:/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin" # traditonal linux paths
@@ -19,25 +20,26 @@ PATH="$PATH:/run/current-system/sw/lib/systemd" # systemd libexec components in 
 # or outdated minirc.conf:
 DAEMONS="\
 syslog-ng \
-iptables \
+dbus \
+acpid \
 alsa \
 crond \
-dbus \
+iptables \
 wpa_supplicant \
+ntpd \
 dhcpcd \
 sshd \
-privoxy \
-polipo \
-acpid \
-mpd \
 vsftpd \
 lighttpd \
-ntpd \
+privoxy \
+polipo \
+mpd \
 haveged \
 "
 
 ENABLED="\
 @dbus \
+@alsa \
 "
 
 UDEV="auto"
@@ -282,6 +284,41 @@ dbus_stop() {
 
 dbus_poll() {
 	test -e /run/dbus/pid
+}
+
+# Hyphens are not supported in function names, so can't use 'systemd-tmpfiles'
+tmpfiles_start() {
+	systemd-tmpfiles --create --remove --boot
+}
+
+tmpfiles_stop() {
+	systemd-tmpfiles --clean
+}
+
+tmpfiles_poll() {
+	return 1
+}
+
+tmpfiles_exists() {
+	return 1
+}
+
+# The defaults do fine for this daemon, but just naming it would cause
+# confusion for overrides since the hyphen can't be used in function names :(
+nixdaemon_start() {
+	default_start "nix-daemon"
+}
+
+nixdaemon_stop() {
+	default_stop "nix-daemon"
+}
+
+nixdaemon_poll() {
+	default_poll "nix-daemon"
+}
+
+nixdaemon_exists() {
+	default_exists "nix-daemon"
 }
 
 iptables_start() {

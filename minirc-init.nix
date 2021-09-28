@@ -3,9 +3,14 @@
 let
   minirc-pkg = (pkgs.callPackage ./. {});
 in {
+  # TODO: Debug lightdm/sddm?
+  #services.xserver.displayManager.startx.enable = true
   environment.systemPackages = [ minirc-pkg ];
   environment.etc = {
-    "minirc.conf".source = ./minirc.conf;
+    "minirc.conf".text = ''
+      ENABLED="@dbus @tmpfiles @nixdaemon"
+      NETWORK_INTERFACE="eno1"
+    '';
     inittab.text = ''
       # Start "rc init" on boot
       ::sysinit:${minirc-pkg}/bin/rc init
@@ -20,7 +25,7 @@ in {
       tty4::respawn:${pkgs.util-linux}/bin/agetty tty4 linux
       tty5::respawn:${pkgs.util-linux}/bin/agetty tty5 linux
       tty6::respawn:${pkgs.util-linux}/bin/agetty tty6 linux
-      #tty7::respawn:${pkgs.sddm}/bin/sddm
+      #tty7::respawn:${pkgs.xorg.xinit}/bin/startx
 
       # Shutdown when pressing CTRL+ALT+DEL (disabled by default)
       #::ctrlaltdel:kill -USR2 1
@@ -43,4 +48,3 @@ in {
   };
   boot.systemdExecutable = "${minirc-pkg}/bin/init";
 }
-

@@ -9,7 +9,7 @@ Later, in the user space, you can use it to list currently running daemons and
 individually start or stop them.
 
 It was developed for arch linux to get rid of systemd, but it can probably run
-on other distributions as well.
+on other distributions as well. And it now has support for NixOS!
 
 ![screenshot](screenshot.png)
 
