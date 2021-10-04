@@ -109,16 +109,21 @@ on_boot() {
 	mountpoint -q /dev/shm || mount -t tmpfs shm /dev/shm -o mode=1777,nosuid,nodev
 	mount -o remount,rw /
 	
-	echo_color 3 logging init to /var/log/initlog
+	# TODO: Rotate X number of logs, or timestamp?
+	echo_color 3 logging init to /var/log/rc/initlog
 	set -x
-	mkdir -p /var/log
-	touch "/var/log/initlog"
-	exec 1>"/var/log/initlog"
+	mkdir -p /var/log/rc
+	touch "/var/log/rc/initlog"
+	exec 1>"/var/log/rc/initlog"
 	exec 2>&1
 
 	# initialize system
 	echo_color 3 setting up loopback device...
 	ip link set up dev lo
+
+	# Consider modprobing these in case udev fails?
+	#modprobe xhci_hcd
+	#modprobe usbhid
 
 	echo_color 3 initializing udev...
 	if [ "${UDEV}" = "auto" ]; then
@@ -128,7 +133,7 @@ on_boot() {
 			UDEV="eudev"
 		else
 			UDEV="busybox"
-	fi
+		fi
 	fi
 	if [ "${UDEV}" = "systemd" ]; then
 		systemd-udevd --daemon
@@ -155,7 +160,7 @@ on_boot() {
 	echo_color 3 starting daemons...
 	for dmn in ${ENABLED}; do
 		if [ "${dmn:0:1}" = '@' ]; then
-			daemon start "${dmn:1}" &
+			daemon start "${dmn:1}" > "/var/log/rc/${dmn:1}" 2>&1 &
 		else
 			daemon start "${dmn}"
 		fi
@@ -205,10 +210,10 @@ on_shutdown() {
 daemon() {
 	case "${1}" in
 		start)
-			echo_color 2 starting "$1"...
+			echo_color 2 starting "$2"...
 			;;
 		stop)
-			echo_color 1 stopping "$1"...
+			echo_color 1 stopping "$2"...
 			;;
 		restart)
 			;;
@@ -248,7 +253,7 @@ default_exists() {
 
 alsa_start() {
 	if wait_on "[ -c /dev/snd/controlC0 ]"; then
-		alsactl -q restore || alsactl -q --no-lock restore
+		alsactl restore || alsactl --no-lock restore
 		return
 	fi
 	return 0
@@ -256,7 +261,7 @@ alsa_start() {
 
 alsa_stop() {
 	mkdir -p /var/lib/alsa
-	alsactl -q store || alsactl -q --no-lock store
+	alsactl store || alsactl --no-lock store
 }
 
 alsa_poll() {
@@ -273,7 +278,9 @@ bitlbee_start() {
 }
 
 dbus_start() {
-	mkdir -p /run/dbus && dbus-uuidgen --ensure && dbus-daemon --system
+	mkdir -p /run/dbus
+	dbus-uuidgen --ensure
+	dbus-daemon --system
 }
 
 dbus_stop() {
@@ -284,6 +291,12 @@ dbus_stop() {
 
 dbus_poll() {
 	test -e /run/dbus/pid
+}
+
+upowerd_start() {
+	wait_on dbus_poll
+	# Let dbus start upowerd by invoking upower, not normally available in PATH
+	upower
 }
 
 # Hyphens are not supported in function names, so can't use 'systemd-tmpfiles'
@@ -319,6 +332,11 @@ nixdaemon_poll() {
 
 nixdaemon_exists() {
 	default_exists "nix-daemon"
+}
+
+# User daemon, start for all human users
+pulseaudio_start() {
+	pulseaudio --system --daemonize=true
 }
 
 iptables_start() {
@@ -360,7 +378,6 @@ dhcpdc_start() {
 		echo_color 3 "waiting for ${NETWORK_INTERFACE} to settle..."
 		wait_on "ip link | grep -Fq ${NETWORK_INTERFACE}"
 	fi
-	# TODO: This doesn't work on nixos, no /etc/dhcpcd.conf, the config file path is hardcoded into systemd service file (wtf!)
 	dhcpcd -nqb
 }
 

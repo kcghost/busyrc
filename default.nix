@@ -15,4 +15,10 @@ pkgs.stdenvNoCC.mkDerivation {
     '';})
   ];
   installFlags = [ "prefix=/" "DESTDIR=$(out)" ];
+  postInstall = ''
+    mkdir -p "$out/bin"
+    echo "#! ${pkgs.stdenv.shell}" >> "$out/bin/init_shell"
+    echo "exec $(which busybox) ash" >> "$out/bin/init_shell"
+    chmod +x "$out/bin/init_shell"
+  '';
 }
