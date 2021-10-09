@@ -19,10 +19,13 @@ PATH="$PATH:/run/current-system/sw/lib/systemd" # systemd libexec components in 
 # Fallback Configuration Values, to be able to run even with a broken, deleted
 # or outdated minirc.conf:
 DAEMONS="\
+syslogd \
+klogd \
 syslog-ng \
 dbus \
 acpid \
 alsa \
+pulseaudio \
 crond \
 iptables \
 wpa_supplicant \
@@ -38,7 +41,8 @@ haveged \
 "
 
 ENABLED="\
-@dbus \
+@syslogd \
+@klogd \
 @alsa \
 "
 
@@ -334,7 +338,6 @@ nixdaemon_exists() {
 	default_exists "nix-daemon"
 }
 
-# User daemon, start for all human users
 pulseaudio_start() {
 	pulseaudio --system --daemonize=true
 }
