@@ -12,8 +12,8 @@ Please put the following in your configuration.nix:
 services.xserver.displayManager.startx.enable = true;
 ```
 
-You will also need a `~/.xinitrc` that tells X what programs to start, most likely a whole desktop environment.
-Use the following example for KDE Plasma:
+You will also need a `~/.xinitrc` that tells X what programs to start, most likely a whole desktop environment or window manager.
+This portion should be common to any .xinitrc you write:
 ```
 [ -f ~/.xprofile ] && . ~/.xprofile
 [ -f ~/.Xresources ] && xrdb -merge ~/.Xresources
@@ -22,21 +22,50 @@ if test -z "$DBUS_SESSION_BUS_ADDRESS"; then
   eval $(dbus-launch --exit-with-session --sh-syntax)
 fi
 
+# For debugging:
+#exec xterm -maximized
+```
+
+NixOS does not have much readily available information on starting the various desktop environments under startx.
+Here are a few I have tested:
+
+#### KDE Plasma
+
+```
 export DESKTOP_SESSION=plasma
-# If GLX is messed up (see systemd-tmpfiles):
+# If GLX is messed up (see notes on systemd-tmpfiles):
 #export QT_XCB_GL_INTEGRATION=none
 exec startplasma-x11
-
-# For debugging:
-#exec xterm -fullscreen
 ```
 
-GNOME and others are untested, but it should be something like:
+#### LXQt
+
+When LXQt is used without lightdm you should install `gnome.adwaita-icon-theme` otherwise application icons don't show for some reason.
+This doesn't have to do with minirc or even startx, the same happens when using sddm and systemd.
+
 ```
-export XDG_SESSION_TYPE=x11
-export GDK_BACKEND=x11
-exec gnome-session
+export XDG_CONFIG_DIRS=$XDG_CONFIG_DIRS:/run/current-system/sw/share
+export XDG_DATA_DIRS=$XDG_DATA_DIRS:/run/current-system/sw/share
+exec startlxqt
 ```
+
+#### XFCE
+
+```
+exec startxfce4
+
+```
+
+#### MATE
+
+```
+exec mate-session
+```
+
+#### GNOME
+
+Honestly no idea. Please file a pull request or issue if you know some way to start it. `gnome-session` isn't even available in PATH.
+Seems to have fairly tight integration with systemd and gdm.
 
 User Permissions
 ----------------
@@ -47,7 +76,7 @@ It also configures pulseaudio to be a system daemon, so additionally normal user
 
 This does represent a relatively minor security issue, you may wish to think twice if the system is shared by multiple or untrustworthy users.
 
-Follow the following example for your configuration.nix:
+Follow this example for your configuration.nix:
 ```
   users.users.nixuser = {
     isNormalUser = true;
@@ -55,6 +84,35 @@ Follow the following example for your configuration.nix:
     hashedPassword = "<hashed_password>;
   };
 ```
+
+autologin and startx
+--------------------
+
+You might have something like this in your configuration.nix already:
+```
+  services.xserver.displayManager.autoLogin.enable = true;
+  services.xserver.displayManager.autoLogin.user = "<your_user>";
+```
+
+That won't work anymore since startx is not really a display manager.
+Instead there is just a normal getty terminal on tty7, and you can login to whichever tty you like and execute 'startx'.
+
+There *is* a NixOS option for getty autologin which this project takes into account when building inittab however:
+```
+services.getty.autologinUser = '<your_user>';
+```
+That will ensure you are logged into each terminal automatically. (Take a look at the /etc/inittab spec in minirc-init.nix and just override it if you need more fine-grained control.)
+
+Next, you probably want an X session to start automatically. You can do this in the [standard hook into profile manner](https://wiki.archlinux.org/title/Xinit#Autostart_X_at_login).
+Try putting the following in `~/.profile` (or `~/.bash_profile` or `~/.bash_login` if you have them, since those files take precedence in a bash login shell):
+```
+if [ -z "${DISPLAY}" ] && [ "$(tty)" = "/dev/tty7" ]; then
+  startx
+fi
+```
+
+Note that often `exec startx` is used above, but this could be dangerous as a broken .xinitrc will cause the X server to repeatedly attempt to start, and take away terminal control from the user as a result.
+If startx breaks, it's best to exit out to a normal terminal you can use for debugging.
 
 nixos-rebuild
 -------------
@@ -102,6 +160,7 @@ PATH="$PATH:/run/current-system/sw/lib/systemd" # systemd libexec components in 
 ```
 
 Or leave out the PATH adjustments to work with only busybox builtins. (Press TAB twice to see all builtins).
+This is useful since at least theorhetically it's faster and portable to use builtins since they don't fork, and busybox can build in practically all of it's capabilities.
 
 systemd units
 -------------
@@ -117,9 +176,9 @@ init
 
 Nix has two init 'stages' before actually starting systemd as PID 1.
 
-You can see an 'init=' specified in /proc/cmdline, but that is a lie on most systems.
+You can see an 'init=' specified in /proc/cmdline, but that is a lie (on most systems).
 If an initrd is given to the kernel, the kernel will instead run the init inside that and ignore the `init=` on the cmdline.
-That `init=` script is actually Stage 2 init, Stage 1 is inside the initrd andlooks at the cmdline and executes that stage when it is done.
+That `init=` script is actually Stage 2 init, Stage 1 is inside the initrd and looks at the cmdline and executes that stage when it is done.
 Stage 2 is written in such a way that it can handle being the only init script, Stage 1 can be skipped entirely if need be.
 
 By default, NixOS runs with an initrd. In fact it is difficult to disable the initrd.
@@ -172,13 +231,13 @@ udev
 NixOS being a systemd distro, it uses `systemd-udev`. `udev` used to be a separate entity from systemd, but it's entire codebase was merged with systemd sources and maintained from there.
 Which is frankly insane. Thankfully the resulting executable, despite the name, can be called on its own and act separately from systemd. So keeping it as "the udev" is often the right choice for any distro that normally uses systemd.
 
-Something to keep in mind, hardly any device support is builtin to the kernel itself, it needs to be modprobed, which will automatically happen as a result of udev. That includes things like a USB mouse and keyboard however, so if udev fails to start for whatever reason, the user at a nromal desktop is stuck looking at a getty session they can't type into.
+Something to keep in mind, hardly any device support is builtin to the kernel itself, it needs to be modprobed, which will automatically happen as a result of udev. That includes things like a USB mouse and keyboard however, so if udev fails to start for whatever reason, the user at a normal desktop is stuck looking at a getty session they can't type into.
 Might want to consider some early modprobes for common input devices or kernel configuration advice for building in support, should theorhetically reduce boot time as well.
 
 dbus
 ----
 
-Starting dbus in a more "normal Linux" way of `dbus-daemon --system` seems fine for most purposes.
+Starting dbus in a more "normal linux" way of `dbus-daemon --system` seems fine for most purposes.
 Not certain yet if the derivation from the systemd ExecStart of `dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only`
 will cause any problems.
 
@@ -193,7 +252,7 @@ Workaround for now is just use startx instead.
 lightdm
 -------
 
-The default display manager lightdm doesn't work either, some other issue.
+The default display manager lightdm doesn't work either, some other issue is happening.
 
 dhcpcd
 ------
@@ -231,7 +290,7 @@ This was a huge pain to debug, and I don't understand why this service is necess
 systemd-tmpfiles and opengl drivers
 -----------------------------------
 
-Another odd issue with starting X is that all of KDE refused to start without the follwing hack in `.xinitrc`:
+Another odd issue with starting X is that KDE initially refused to start without the follwing hack in `.xinitrc`:
 ```
 export QT_XCB_GL_INTEGRATION=none
 exec startplasma-x11
@@ -252,13 +311,13 @@ The modern normal way is a systemd user unit. It seems about equivalent to runni
 I initially tried looping through users and starting `pulseaudio --start` for each user, but I believe only one instance is allowed at any time. (How does multiseat work?).
 
 The older normal way is autospawn, which starts the user daemon if it doesn't exist already when any application that links with pulseaudio libraries calls into them.
-This is disabled in NixOS, see `/etc/pulse/client.conf`. This might be the best bet if you heed the nasty warnings and want a user daemon for pulseaudio. It's sneaky though, it is non-obvious how the daemon gets started without the user actually knowing about this fun-fact.
+This is disabled in NixOS, see `/etc/pulse/client.conf`. This might be the best bet if you heed the nasty warnings and want a user daemon for pulseaudio. It's sneaky though, it is non-obvious how the daemon gets started without the user actually knowing about this little fun-fact.
 
 Or you can just configure NixOS for the system daemon, which sets up the `pulse` user and you can start pulseaudio like a normal system service.
 This has several benefits anyway and seems to be the best choice for a trusted workstation, so that's what this project is going with.
 
-And of course, nixpkgs doesn't use the configuration place (`/etc/pulse/system.pa'`) and it needs to be ripped from the systemd Exec line so it can be invoked normally.
-To be fair I needed strace to find out it should be system.pa and not default.pa, pulseaudio does not make this obvious.
+And of course, nixpkgs doesn't use the right configuration place (`/etc/pulse/system.pa'`) and it needs to be ripped from the systemd Exec line so it can be invoked normally.
+To be fair I needed strace to find out it should be system.pa and not default.pa, pulseaudio documentation does not make this obvious.
 
 upowerd
 -------
