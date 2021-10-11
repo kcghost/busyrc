@@ -15,7 +15,10 @@ install:
 	install -Dm644 src/inittab $(DESTDIR)$(sysconfdir)/inittab
 	install -Dm644 src/_minirc $(DESTDIR)$(datadir)/zsh/site-functions/_minirc
 	install -Dm755 src/shutdown $(DESTDIR)$(sbindir)/shutdown
+	install -Dm755 src/bbwrap $(DESTDIR)$(sbindir)/bbwrap
 	for i in init halt poweroff reboot; do ln -sf $$(which busybox) $(DESTDIR)$(sbindir)/$$i; done
 
 check:
-	shellcheck -ax -s dash src/rc
+	-shellcheck -ax -s dash src/rc
+	-shellcheck -ax -s dash src/bbwrap
+	-shellcheck -ax -s dash src/shutdown

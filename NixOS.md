@@ -122,7 +122,7 @@ nix-os-rebuild calls the `switch-to-configuration` perl script, which is closely
 Specifically the switch will fail when the script attempts to communciate with systemd over dbus, it looks for "org.freedesktop.systemd1".
 Thankfully the script quits out before any of that when called for "boot" instead.
 
-Use the following workaround to switch to a new system without using "switch":
+A workaround command `nixos-switch` is installed that just does the following:
 ```
 sudo nixos-rebuild boot
 sudo /nix/var/nix/profiles/system/activate
@@ -146,13 +146,13 @@ Most solutions do take the path of least resistance, but wherever reasonably pos
 Instead this project aims to make NixOS act a little more like a standard Linux distro, especially so that the 'rc' script is at least theorhetically compatible across
 differing distributions.
 
-init_shell
-----------
+bbwrap
+------
 
-Included with the minirc installation is a wrapper for the busybox ash shell, available as 'init_shell' in PATH.
+Included with the minirc installation is a wrapper for custom configured busybox, available as 'bbwrap' in PATH.
 You can test an init envrionment with:
 ```
-env -i init_shell
+env -i bbwrap ash
 PATH="$PATH:/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin" # traditonal linux paths
 PATH="$PATH:/usr/lib/systemd" # systemd libexec components normally hidden from PATH
 PATH="$PATH:/run/current-system/sw/bin:/run/current-system/sw/sbin:/run/wrappers/bin" # NixOS standard path
