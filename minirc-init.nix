@@ -2,8 +2,9 @@
 
 let
   minirc-pkg = (pkgs.callPackage ./. {});
-  pulseaudiod = if config.hardware.pulseaudio.enable then "@pulseaudio" else "";
-  autologin = if config.services.getty.autologinUser != null then "--autologin ${config.services.getty.autologinUser}" else "";
+  pulseaudiod = if config.hardware.pulseaudio.enable then " @pulseaudio" else "";
+  sshd = if config.services.sshd.enable then " @sshd" else "";
+  autologin = if config.services.getty.autologinUser != null then " --autologin ${config.services.getty.autologinUser}" else "";
 in {
   # Enable system wide pulseaudio daemon
   hardware.pulseaudio.systemWide = true;
@@ -11,7 +12,7 @@ in {
   environment.etc = {
     "minirc.conf".text = ''
       UDEV="systemd"
-      ENABLED="@syslogd @klogd @dbus @acpid @tmpfiles @nixdaemon @dhcpcd @alsa @upowerd ${pulseaudiod}"
+      ENABLED="@syslogd @klogd @dbus @acpid @tmpfiles @nixdaemon @dhcpcd @alsa @upowerd${pulseaudiod}${sshd}"
       NETWORK_INTERFACE="eno1"
     '';
     "inittab".text = ''
@@ -22,13 +23,13 @@ in {
       # You could use "-/bin/sh" for a direct login shell
       # or "agetty -a root tty1 linux" for autologin
       # A graphical display manager is traditionally launched on tty7
-      tty1::respawn:/run/current-system/sw/bin/agetty ${autologin} tty1 linux
-      tty2::respawn:/run/current-system/sw/bin/agetty ${autologin} tty2 linux
-      tty3::respawn:/run/current-system/sw/bin/agetty ${autologin} tty3 linux
-      tty4::respawn:/run/current-system/sw/bin/agetty ${autologin} tty4 linux
-      tty5::respawn:/run/current-system/sw/bin/agetty ${autologin} tty5 linux
-      tty6::respawn:/run/current-system/sw/bin/agetty ${autologin} tty6 linux
-      tty7::respawn:/run/current-system/sw/bin/agetty ${autologin} tty7 linux
+      tty1::respawn:/run/current-system/sw/bin/agetty${autologin} tty1 linux
+      tty2::respawn:/run/current-system/sw/bin/agetty${autologin} tty2 linux
+      tty3::respawn:/run/current-system/sw/bin/agetty${autologin} tty3 linux
+      tty4::respawn:/run/current-system/sw/bin/agetty${autologin} tty4 linux
+      tty5::respawn:/run/current-system/sw/bin/agetty${autologin} tty5 linux
+      tty6::respawn:/run/current-system/sw/bin/agetty${autologin} tty6 linux
+      tty7::respawn:/run/current-system/sw/bin/agetty${autologin} tty7 linux
 
       # Shutdown when pressing CTRL+ALT+DEL (disabled by default)
       #::ctrlaltdel:kill -USR2 1
