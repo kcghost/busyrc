@@ -339,7 +339,7 @@ nixdaemon_exists() {
 }
 
 pulseaudio_start() {
-	pulseaudio --system --daemonize=true
+	pulseaudio --system --daemonize=true --disallow-exit=true --log-target=syslog
 }
 
 iptables_start() {
@@ -356,6 +356,10 @@ iptables_stop() {
 
 iptables_poll() {
 	sudo iptables -L -n | grep -m 1 -q '^ACCEPT\|^REJECT' >/dev/null 2>&1
+}
+
+iptables_exists() {
+	[ -f /etc/iptables/iptables.rules ]
 }
 
 sshd_start() {
