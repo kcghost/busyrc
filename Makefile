@@ -5,12 +5,17 @@ sysconfdir=$(prefix)/etc
 datarootdir=$(prefix)/share
 datadir=$(datarootdir)
 
-.PHONY: all install check
+services = alsa bitlbee dbus dhcpdc icecast iptables lighttpd nixdaemon ntpd polipo privocy pulseaudio sshd tmpfiles upowerd vsftpd wpa_supplicant acpid
 
-all:
+.PHONY: all install check clean
 
-install:
-	install -Dm755 src/rc $(DESTDIR)$(sbindir)/rc
+rc: src/rc $(foreach service,$(services),src/services/$(service).sh)
+	sed -e '/@services_include@/ {' $(foreach service,$(services), -e 'r src/services/$(service).sh') -e 'd' -e '}' $< > $@
+
+all: rc
+
+install: rc
+	install -Dm755 rc $(DESTDIR)$(sbindir)/rc
 	install -Dm644 src/minirc.conf $(DESTDIR)$(sysconfdir)/minirc.conf
 	install -Dm644 src/inittab $(DESTDIR)$(sysconfdir)/inittab
 	install -Dm644 src/_minirc $(DESTDIR)$(datadir)/zsh/site-functions/_minirc
@@ -22,3 +27,7 @@ check:
 	-shellcheck -ax -s dash src/rc
 	-shellcheck -ax -s dash src/bbwrap
 	-shellcheck -ax -s dash src/shutdown
+	-shellcheck -ax -s dash src/services/*
+
+clean:
+	rm -f rc

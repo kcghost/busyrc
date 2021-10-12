@@ -12,6 +12,7 @@ in {
   environment.etc = {
     "minirc.conf".text = ''
       UDEV="systemd"
+      DAEMONS="syslogd klogd dbus acpid tmpfiles nixdaemon dhcpcd alsa upowerd pulseaudio sshd"
       ENABLED="@syslogd @klogd @dbus @acpid @tmpfiles @nixdaemon @dhcpcd @alsa @upowerd${pulseaudiod}${sshd}"
       NETWORK_INTERFACE="eno1"
     '';

@@ -1,0 +1,4 @@
+
+vsftpd_start() {
+	vsftpd &
+}

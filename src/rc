@@ -18,33 +18,8 @@ PATH="$PATH:/run/current-system/sw/lib/systemd" # systemd libexec components in 
 
 # Fallback Configuration Values, to be able to run even with a broken, deleted
 # or outdated minirc.conf:
-DAEMONS="\
-syslogd \
-klogd \
-syslog-ng \
-dbus \
-acpid \
-alsa \
-pulseaudio \
-crond \
-iptables \
-wpa_supplicant \
-ntpd \
-dhcpcd \
-sshd \
-vsftpd \
-lighttpd \
-privoxy \
-polipo \
-mpd \
-haveged \
-"
-
-ENABLED="\
-@syslogd \
-@klogd \
-@alsa \
-"
+DAEMONS="syslogd klogd"
+ENABLED="@syslogd @klogd"
 
 UDEV="auto"
 NETWORK_INTERFACE="eth0"
@@ -255,165 +230,13 @@ default_exists() {
 	command -v "${1}" >/dev/null 2>&1
 }
 
-alsa_start() {
-	if wait_on "[ -c /dev/snd/controlC0 ]"; then
-		alsactl restore || alsactl --no-lock restore
-		return
-	fi
-	return 0
-}
-
-alsa_stop() {
-	mkdir -p /var/lib/alsa
-	alsactl store || alsactl --no-lock store
-}
-
-alsa_poll() {
-	return 1
-}
-
-alsa_exists() {
-	# Don't list sysinit actions
-	return 1
-}
-
-bitlbee_start() {
-	su -s /bin/sh -c 'bitlbee -F' bitlbee
-}
-
-dbus_start() {
-	mkdir -p /run/dbus
-	dbus-uuidgen --ensure
-	dbus-daemon --system
-}
-
-dbus_stop() {
-	killall dbus-launch
-	killall dbus-daemon
-	rm /run/dbus/pid
-}
-
-dbus_poll() {
-	test -e /run/dbus/pid
-}
-
-upowerd_start() {
-	wait_on dbus_poll
-	# Let dbus start upowerd by invoking upower, not normally available in PATH
-	upower
-}
-
-# Hyphens are not supported in function names, so can't use 'systemd-tmpfiles'
-tmpfiles_start() {
-	systemd-tmpfiles --create --remove --boot
-}
-
-tmpfiles_stop() {
-	systemd-tmpfiles --clean
-}
-
-tmpfiles_poll() {
-	return 1
-}
-
-tmpfiles_exists() {
-	return 1
-}
-
-# The defaults do fine for this daemon, but just naming it would cause
-# confusion for overrides since the hyphen can't be used in function names :(
-nixdaemon_start() {
-	default_start "nix-daemon"
-}
-
-nixdaemon_stop() {
-	default_stop "nix-daemon"
-}
-
-nixdaemon_poll() {
-	default_poll "nix-daemon"
-}
-
-nixdaemon_exists() {
-	default_exists "nix-daemon"
-}
-
-pulseaudio_start() {
-	pulseaudio --system --daemonize=true --disallow-exit=true --log-target=syslog
-}
-
-iptables_start() {
-	if [ -f /etc/iptables/iptables.rules ]; then
-		iptables-restore < /etc/iptables/iptables.rules
-	fi
-}
-
-iptables_stop() {
-	for table in $(cat /proc/net/ip_tables_names); do
-		iptables-restore < /var/lib/iptables/empty-"$table".rules
-	done
-}
-
-iptables_poll() {
-	sudo iptables -L -n | grep -m 1 -q '^ACCEPT\|^REJECT' >/dev/null 2>&1
-}
-
-iptables_exists() {
-	[ -f /etc/iptables/iptables.rules ]
-}
-
-sshd_start() {
-	eval "$(command -v sshd)"  # sshd requires an absolute path, so grab path from command -v
-}
-
-sshd_restart() {
-	# Make sure minirc doesn't hang up when restarting it remotely
-	# TODO: Address "busybox" reference, might not be in PATH
-	busybox setsid sh -c '"$0" stop "$@"; "$0" start "$@"' "$0" "$@"
-}
-
-privocy_start() {
-	privoxy --user privoxy.privoxy /etc/privoxy/config
-}
-
-polipo_start() {
-	su -c 'polipo daemonise=true logFile="/var/log/polipo.log"' -s /bin/sh - nobody
-}
-
-dhcpdc_start() {
-	if ip link | grep -Fq ${NETWORK_INTERFACE}; then :; else
-		echo_color 3 "waiting for ${NETWORK_INTERFACE} to settle..."
-		wait_on "ip link | grep -Fq ${NETWORK_INTERFACE}"
-	fi
-	dhcpcd -nqb
-}
-
-vsftpd_start() {
-	vsftpd &
-}
-
-lighttpd_start() {
-	lighttpd -f /etc/lighttpd/lighttpd.conf
-}
-
-ntpd_start() {
-	ntpd -g -u ntp
-}
-
-wpa_supplicant_start() {
-	wait_on "iwconfig ${WIFI_INTERFACE}"
-	wpa_supplicant -Dwext -B -i"${WIFI_INTERFACE}" -c/etc/wpa_supplicant.conf
-}
-
-icecast_start() {
-	icecast -b -c /etc/icecast.xml
-}
-
 echo_color() {
 	color="$1"
 	shift
 	printf "\033[1;3%sm%s\033[00m\n" "${color}" "$*"
 }
+
+@services_include@
 
 if [ -r /etc/minirc.conf ]; then
 	. /etc/minirc.conf
