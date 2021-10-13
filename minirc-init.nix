@@ -4,6 +4,7 @@ let
   minirc-pkg = (pkgs.callPackage ./. {});
   pulseaudiod = if config.hardware.pulseaudio.enable then " @pulseaudio" else "";
   sshd = if config.services.sshd.enable then " @sshd" else "";
+  dockerd = if config.virtualisation.docker.enable then " @dockerd" else "";
   autologin = if config.services.getty.autologinUser != null then " --autologin ${config.services.getty.autologinUser}" else "";
 in {
   # Enable system wide pulseaudio daemon
@@ -12,8 +13,8 @@ in {
   environment.etc = {
     "minirc.conf".text = ''
       UDEV="systemd"
-      DAEMONS="syslogd klogd dbus acpid tmpfiles nixdaemon dhcpcd alsa upowerd pulseaudio sshd"
-      ENABLED="@syslogd @klogd @dbus @acpid @tmpfiles @nixdaemon @dhcpcd @alsa @upowerd${pulseaudiod}${sshd}"
+      DAEMONS="syslogd klogd dbus acpid tmpfiles nixdaemon dhcpcd alsa upowerd pulseaudio sshd dockerd"
+      ENABLED="@syslogd @klogd @dbus @acpid @tmpfiles @nixdaemon @dhcpcd @alsa @upowerd${pulseaudiod}${sshd}${dockerd}"
       NETWORK_INTERFACE="eno1"
     '';
     "inittab".text = ''
