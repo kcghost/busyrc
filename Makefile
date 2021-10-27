@@ -5,7 +5,7 @@ sysconfdir=$(prefix)/etc
 datarootdir=$(prefix)/share
 datadir=$(datarootdir)
 
-services = alsa bitlbee dbus dhcpdc icecast iptables lighttpd nixdaemon ntpd polipo privocy pulseaudio sshd tmpfiles upowerd vsftpd wpa_supplicant acpid
+services = alsa bitlbee dbus dockerd dhcpdc icecast iptables lighttpd nixdaemon ntpd polipo privocy pulseaudio sshd tmpfiles upowerd vsftpd wpa_supplicant acpid
 
 .PHONY: all install check clean
 
