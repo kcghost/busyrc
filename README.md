@@ -84,8 +84,6 @@ Reboot.
 Dealing with services
 ---------------------
 
-Note: This API differs from the original busyrc.
-
 The variable DAEMONS contains a space-separated list of services that busyrc
 lists when you ask which services currently run.
 

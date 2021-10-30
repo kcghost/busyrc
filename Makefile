@@ -5,12 +5,18 @@ sysconfdir=$(prefix)/etc
 datarootdir=$(prefix)/share
 datadir=$(datarootdir)
 
-services = alsa bitlbee dbus dockerd dhcpdc icecast iptables lighttpd nixdaemon ntpd polipo privocy pulseaudio sshd tmpfiles upowerd vsftpd wpa_supplicant acpid
+services = $(basename $(notdir $(wildcard src/services/*.sh)))
 
 .PHONY: all install check clean
 
-rc: src/rc $(foreach service,$(services),src/services/$(service).sh)
-	sed -e '/@services_include@/ {' $(foreach service,$(services), -e 'r src/services/$(service).sh') -e 'd' -e '}' $< > $@
+rc: src/rc.sh $(foreach service,$(services),src/services/$(service).sh)
+	sed -e \
+	'/@services_include@/ {' \
+		-e "i SERVICES=\"$(foreach service,$(services),$(service))\"" \
+		$(foreach service,$(services), -e 'r src/services/$(service).sh') \
+	-e 'd' -e '}' \
+	$< > $@
+	chmod +x $@
 
 all: rc
 

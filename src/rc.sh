@@ -32,7 +32,7 @@ fi
 
 # Fallback Configuration Values, to be able to run even with a broken, deleted
 # or outdated busyrc.conf:
-DAEMONS="syslogd klogd"
+DAEMONS=""
 ENABLED="@syslogd @klogd"
 
 UDEV="auto"
@@ -161,9 +161,8 @@ on_boot() {
 	echo_color 3 mounting rest of filesystems...
 	wait_on "mount -a"
 
-	# load /etc/rc.local
 	if [ -x /etc/rc.local ]; then
-		echo_color 3 loading /etc/rc.local...
+		echo_color 3 executing /etc/rc.local...
 		/etc/rc.local
 	fi
 }
@@ -179,7 +178,6 @@ on_shutdown() {
 		fi
 	done
 
-	# load rc.local_shutdown
 	if [ -x /etc/rc.local_shutdown ]; then
 		echo_color 3 executing /etc/rc.local_shutdown...
 		/etc/rc.local_shutdown
@@ -249,10 +247,30 @@ echo_color() {
 	printf "\033[1;3%sm%s\033[00m\n" "${color}" "$*"
 }
 
+in_list() {
+	for x in $2; do
+		if [ "${x}" = "${1}" ]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+# Define all services in src/services/ and a SERVICES variable listing them
 @services_include@
 
 if [ -r /etc/busyrc.conf ]; then
 	. /etc/busyrc.conf
+fi
+
+# Populate a reasonable default for DAEMONS
+if [ -z "${DAEMONS}" ]; then
+	DAEMONS="${ENABLED//@/}"
+	for dmn in ${SERVICES}; do
+		if daemon exists "${dmn}" && ! in_list ${dmn} ${DAEMONS}; then
+			DAEMONS="${DAEMONS} ${dmn}"
+		fi
+	done
 fi
 
 main $@
