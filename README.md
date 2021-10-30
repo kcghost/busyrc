@@ -1,9 +1,9 @@
 busyrc - minimalistic rc script
 ===============================
 
-Note: This is a fork of busyrc with several improvements, API changes, and
+Note: This is a fork of minirc with several improvements, API changes, and
 a focus on supporting NixOS in particular.
-The original busyrc can be found [here.](https://github.com/hut/busyrc)
+The original minirc can be found [here.](https://github.com/hut/minirc)
 
 The script "rc" is a minimalistic init script made for use with busybox init.
 It starts up udev, sets the hostname, mounts the file systems, starts the
