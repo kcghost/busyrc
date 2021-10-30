@@ -8,13 +8,27 @@
 
 # Note: Preferable to use a busybox with:
 # FEATURE_SH_STANDALONE, FEATURE_PREFER_APPLETS, FEATURE_SH_NOFORK
-# In NixOS the shebang is automatically rewritten to use one with these features
+# In NixOS the shebang is automatically rewritten to use a busybox with these features (but not actually install it to PATH)
 # Assume busybox ash shell features and prefer builtins or nofork applets
 
 PATH="$PATH:/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin" # traditonal linux paths
 PATH="$PATH:/usr/lib/systemd" # systemd libexec components normally hidden from PATH
 PATH="$PATH:/run/current-system/sw/bin:/run/current-system/sw/sbin:/run/wrappers/bin" # NixOS standard path
 PATH="$PATH:/run/current-system/sw/lib/systemd" # systemd libexec components in NixOS
+
+# Some busybox installations might not have SH_STANDALONE or PREFER_APPLETS features
+# And they might have applets available in busybox itself but without symlinks in PATH
+# Find applets supported by busybox and define functions for them so they can be called normally
+if command -v "busybox" >/dev/null 2>&1; then
+	for cmd in $(busybox --list); do
+		if ! command -v "${cmd}" >/dev/null 2>&1; then
+			# cmd is supported by busybox but doesn't have a link in PATH
+			# Define a function so it can be used without prepending busybox
+			#echo "${cmd} is supported by busybox not found in PATH!"
+			eval "function ${cmd}() { busybox ${cmd} \$@; }"
+		fi
+	done
+fi
 
 # Fallback Configuration Values, to be able to run even with a broken, deleted
 # or outdated minirc.conf:
@@ -124,8 +138,7 @@ on_boot() {
 		udevadm trigger --action=add --type=devices
 	else # use busybox mdev as fallback:
 		# TODO: hotplug might not exist. It's not a normally enabled feature anymore, CONFIG_UEVENT_HELPER enables it
-		# TODO: Address "busybox" reference, might not be in PATH
-		busybox mdev -s
+		mdev -s
 		echo /sbin/mdev > /proc/sys/kernel/hotplug
 	fi
 
