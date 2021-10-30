@@ -17,9 +17,10 @@ iptables_stop() {
 }
 
 iptables_poll() {
-	sudo iptables -L -n | grep -m 1 -q '^ACCEPT\|^REJECT' >/dev/null 2>&1
+	return 1
 }
 
 iptables_exists() {
-	[ -f /etc/iptables/iptables.rules ]
+	# Don't list sysinit actions
+	return 1
 }
