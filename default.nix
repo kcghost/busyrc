@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> {}, packageSrc ? ./. }:
 
 pkgs.stdenvNoCC.mkDerivation {
-  name = "minirc";
+  name = "busyrc";
   src = ./.;
   buildInputs = [pkgs.which];
   propagatedBuildInputs = [

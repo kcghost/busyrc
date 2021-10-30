@@ -16,9 +16,9 @@ all: rc
 
 install: rc
 	install -Dm755 rc $(DESTDIR)$(sbindir)/rc
-	install -Dm644 src/minirc.conf $(DESTDIR)$(sysconfdir)/minirc.conf
+	install -Dm644 src/busyrc.conf $(DESTDIR)$(sysconfdir)/busyrc.conf
 	install -Dm644 src/inittab $(DESTDIR)$(sysconfdir)/inittab
-	install -Dm644 src/_minirc $(DESTDIR)$(datadir)/zsh/site-functions/_minirc
+	install -Dm644 src/_busyrc $(DESTDIR)$(datadir)/zsh/site-functions/_busyrc
 	install -Dm755 src/shutdown $(DESTDIR)$(sbindir)/shutdown
 	install -Dm755 src/bbwrap $(DESTDIR)$(sbindir)/bbwrap
 	for i in init halt poweroff reboot; do ln -sf $$(which busybox) $(DESTDIR)$(sbindir)/$$i; done

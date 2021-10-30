@@ -31,7 +31,7 @@ if command -v "busybox" >/dev/null 2>&1; then
 fi
 
 # Fallback Configuration Values, to be able to run even with a broken, deleted
-# or outdated minirc.conf:
+# or outdated busyrc.conf:
 DAEMONS="syslogd klogd"
 ENABLED="@syslogd @klogd"
 
@@ -66,7 +66,7 @@ main() {
 			fi
 		done;;
 	--version)
-		echo minirc 1.0;;
+		echo busyrc 1.0;;
 	*)
 		self=$(basename "$0")
 		echo "Usage: ${self} [--help] [--version] <action> [list of daemons]"
@@ -251,8 +251,8 @@ echo_color() {
 
 @services_include@
 
-if [ -r /etc/minirc.conf ]; then
-	. /etc/minirc.conf
+if [ -r /etc/busyrc.conf ]; then
+	. /etc/busyrc.conf
 fi
 
 main $@

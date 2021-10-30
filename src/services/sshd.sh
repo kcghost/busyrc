@@ -4,7 +4,7 @@ sshd_start() {
 }
 
 sshd_restart() {
-	# Make sure minirc doesn't hang up when restarting it remotely
+	# Make sure busyrc doesn't hang up when restarting it remotely
 	# TODO: Address "busybox" reference, might not be in PATH
 	busybox setsid sh -c '"$0" stop "$@"; "$0" start "$@"' "$0" "$@"
 }

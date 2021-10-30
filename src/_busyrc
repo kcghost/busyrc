@@ -1,5 +1,5 @@
 #compdef rc.d
-_minirc_commands(){
+_busyrc_commands(){
    local -a _cmds
    _cmds=(
       'start:start a service'
@@ -11,6 +11,6 @@ _minirc_commands(){
 }
             
 _arguments -C -A "-*" \
-    '1:command:_minirc_commands' \
+    '1:command:_busyrc_commands' \
     --help'[show basic usage]' \
     --version'[show version information]' \

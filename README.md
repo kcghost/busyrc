@@ -1,9 +1,9 @@
-minirc - minimalistic rc script
+busyrc - minimalistic rc script
 ===============================
 
-Note: This is a fork of minirc with several improvements, API changes, and
+Note: This is a fork of busyrc with several improvements, API changes, and
 a focus on supporting NixOS in particular.
-The original minirc can be found [here.](https://github.com/hut/minirc)
+The original busyrc can be found [here.](https://github.com/hut/busyrc)
 
 The script "rc" is a minimalistic init script made for use with busybox init.
 It starts up udev, sets the hostname, mounts the file systems, starts the
@@ -33,7 +33,7 @@ Clone this repository and put the following in your `configuration.nix`:
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      <path-to>/minirc/minirc-init.nix
+      <path-to>/busyrc/busyrc-init.nix
     ];
 ```
 
@@ -61,7 +61,7 @@ Installing on Arch or other distributions
 -----------------------------------------
 
 WARNING: Unknown if this project still works on Arch. You may want to take a
-look at the [original project](https://github.com/hut/minirc) that has an AUR
+look at the [original project](https://github.com/hut/busyrc) that has an AUR
 package.
 
 Dependencies: busybox, optionally eudev or systemd (for udev)
@@ -75,7 +75,7 @@ be /sbin/init. (Double check /sbin/init is a symlink to busybox).
 From there busybox init will make use of /etc/inittab, which calls the rc script
 for system initialization.
 
-You will want to configure /etc/minirc.conf to your needs. It contains
+You will want to configure /etc/busyrc.conf to your needs. It contains
 informations on how to define new daemons or override existing ones.
 See sections "Dealing with services" and "Further configuration".
 
@@ -84,9 +84,9 @@ Reboot.
 Dealing with services
 ---------------------
 
-Note: This API differs from the original minirc.
+Note: This API differs from the original busyrc.
 
-The variable DAEMONS contains a space-separated list of services that minirc
+The variable DAEMONS contains a space-separated list of services that busyrc
 lists when you ask which services currently run.
 
 The variable ENABLED contains a space-separated list of services that are
@@ -96,11 +96,11 @@ time so you can boot quickly, but it may require additional logic to wait for
 another service or resource first.
 
 You can override DAEMONS, ENABLED, and define or override services in
-/etc/minirc.conf.  This file is simply sourced by the script right after 
+/etc/busyrc.conf.  This file is simply sourced by the script right after 
 defining the default variables.
 
 To add or override another service you must define the appropriate actions of 
-that service. See the comments in [minirc.conf](minirc.conf) for details.
+that service. See the comments in [busyrc.conf](busyrc.conf) for details.
 
 Further configuration
 ---------------------
@@ -108,9 +108,9 @@ Further configuration
 1. udev
 
    You need to decide what to use to set up the devices and load the modules.
-   minirc supports busybox's mdev, systemd's udev, and a fork of udev, eudev,
+   busyrc supports busybox's mdev, systemd's udev, and a fork of udev, eudev,
    by default.  You can change the udev system by writing UDEV=busybox,
-   UDEV=systemd, or UDEV=eudev respectively into /etc/minirc.conf.
+   UDEV=systemd, or UDEV=eudev respectively into /etc/busyrc.conf.
 
    eudev and systemd's udev work out of the box, so they are recommended.  To
    set up mdev, you can use this as a reference:
@@ -120,7 +120,7 @@ Further configuration
 
    Minirc will run /etc/rc.local on boot if the file exists and has the
    executable bit set. This allows the user to run commands in addition to the
-   basic startup that minirc provides. This is a good place to load modules if
+   basic startup that busyrc provides. This is a good place to load modules if
    udev does not detect that they should be loaded on boot.
    
    It will similiarly run /etc/rc.local_shutdown on shutdown.

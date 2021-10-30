@@ -1,7 +1,7 @@
 {config, pkgs, ...}:
 
 let
-  minirc-pkg = (pkgs.callPackage ./. {});
+  busyrc-pkg = (pkgs.callPackage ./. {});
   pulseaudiod = if config.hardware.pulseaudio.enable then " @pulseaudio" else "";
   sshd = if config.services.sshd.enable then " @sshd" else "";
   dockerd = if config.virtualisation.docker.enable then " @dockerd" else "";
@@ -11,7 +11,7 @@ in {
   hardware.pulseaudio.systemWide = true;
 
   environment.etc = {
-    "minirc.conf".text = ''
+    "busyrc.conf".text = ''
       UDEV="systemd"
       DAEMONS="syslogd klogd dbus acpid tmpfiles nixdaemon dhcpcd alsa upowerd pulseaudio sshd dockerd"
       ENABLED="@syslogd @klogd @dbus @acpid @tmpfiles @nixdaemon @dhcpcd @alsa @upowerd${pulseaudiod}${sshd}${dockerd}"
@@ -68,6 +68,6 @@ in {
     ln -sf "${builtins.elemAt (builtins.match ".*--confdir\' \'([^ ]+)\'.*" config.systemd.services.acpid.serviceConfig.ExecStart) 0}" "/etc/acpi/events"
   '';
 
-  environment.systemPackages = [ minirc-pkg ];
-  boot.systemdExecutable = "${minirc-pkg}/bin/init";
+  environment.systemPackages = [ busyrc-pkg ];
+  boot.systemdExecutable = "${busyrc-pkg}/bin/init";
 }

@@ -41,7 +41,7 @@ exec startplasma-x11
 #### LXQt
 
 When LXQt is used without lightdm you should install `gnome.adwaita-icon-theme` otherwise application icons don't show for some reason.
-This doesn't have to do with minirc or even startx, the same happens when using sddm and systemd.
+This doesn't have to do with busyrc or even startx, the same happens when using sddm and systemd.
 
 ```
 export XDG_CONFIG_DIRS=$XDG_CONFIG_DIRS:/run/current-system/sw/share
@@ -101,7 +101,7 @@ There *is* a NixOS option for getty autologin which this project takes into acco
 ```
 services.getty.autologinUser = '<your_user>';
 ```
-That will ensure you are logged into each terminal automatically. (Take a look at the /etc/inittab spec in minirc-init.nix and just override it if you need more fine-grained control.)
+That will ensure you are logged into each terminal automatically. (Take a look at the /etc/inittab spec in busyrc-init.nix and just override it if you need more fine-grained control.)
 
 Next, you probably want an X session to start automatically. You can do this in the [standard hook into profile manner](https://wiki.archlinux.org/title/Xinit#Autostart_X_at_login).
 Try putting the following in `~/.profile` (or `~/.bash_profile` or `~/.bash_login` if you have them, since those files take precedence in a bash login shell):
@@ -149,7 +149,7 @@ differing distributions.
 bbwrap
 ------
 
-Included with the minirc installation is a wrapper for custom configured busybox, available as 'bbwrap' in PATH.
+Included with the busyrc installation is a wrapper for custom configured busybox, available as 'bbwrap' in PATH.
 You can test an init envrionment with:
 ```
 env -i bbwrap ash
@@ -165,7 +165,7 @@ This is useful since at least theorhetically it's faster and portable to use bui
 systemd units
 -------------
 
-The minirc installation leaves systemd intact, and it's useful to search through systemd units in /etc/ for ExecStart attributes to learn how parts of the system are normally executed.
+The busyrc installation leaves systemd intact, and it's useful to search through systemd units in /etc/ for ExecStart attributes to learn how parts of the system are normally executed.
 The following uses [ripgrep](https://github.com/BurntSushi/ripgrep) to search through /etc for a keyword:
 ```
 rg -L /etc nix-daemon
@@ -219,7 +219,7 @@ Note that you need kernel support to actually mount the rootfs built into the ke
 
 While it's certainly possible to skip the Stage 2 init script, it probably isn't a great idea.
 It's responsible for setting up NixOS's quirky pseudo read-only root filesystem.
-minirc is best placed at the 'systemd' level, and NixOS provides an oddly named: `boot.systemdExecutable` option for overriding the PID 1 init, the contents of that option get executed at the end of Stage 2 init.
+busyrc is best placed at the 'systemd' level, and NixOS provides an oddly named: `boot.systemdExecutable` option for overriding the PID 1 init, the contents of that option get executed at the end of Stage 2 init.
 So despite the name, and the "starting systemd..." message from Stage 2, it can be any init system you want.
 
 The [NixOS Init Freedom](https://sr.ht/~guido/nixos-init-freedom/) project does the same using s6 as the init system, as well as attempts to automagically convert systemd units to s6.
@@ -261,7 +261,7 @@ dhcpcd tries to run /etc/dhcpcd.exit-hook, which calls systemctl and complains. 
 
 One annoying aspect in NixOS is there is no `/etc/dhcpcd.conf`, instead Nix generates a config file in the nix store and the systemd unit references it directly.
 NixOS has a bad habit of doing this for many services, it's a bit perplexing given there is a dedicated system to managing /etc.
-There is a hack in minirc-init.nix to grab it and put it back in its standard place, but it could break with updates to NixOS.
+There is a hack in busyrc-init.nix to grab it and put it back in its standard place, but it could break with updates to NixOS.
 
 acpid
 -----
@@ -277,13 +277,13 @@ This seems to be necessary for stuff like ephemeral shells and other Nix managem
 systemd-logind
 --------------
 
-I believe minirc *could* start this service separatley from systemd itself, if it turns out to be truly necessary for something.
+I believe busyrc *could* start this service separatley from systemd itself, if it turns out to be truly necessary for something.
 A big issue that occurs without it is that X can't get any input from the mouse or keyboard.
 This happens since /dev/input entries are only accessible by root or members of the 'input' group.
 The same goes for some graphics entries for the 'video' group. X is started as the user, and the user is not normally a member of either of these groups.
 
 As far as I understand systemd-logind runs as root, and X negotiates with it for for the file descriptors of these devices, allowing it access despite not being a member.
-minirc could start this daemon, and I believe it mostly works, but without some further setup I don't care to debug the X log still complains about not being a valid session or something.
+busyrc could start this daemon, and I believe it mostly works, but without some further setup I don't care to debug the X log still complains about not being a valid session or something.
 
 This was a huge pain to debug, and I don't understand why this service is necessary. It can be worked around by adding your user to the 'input' and 'video' groups.
 

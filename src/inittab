@@ -1,5 +1,5 @@
 # This is an example /etc/inittab file for "busybox init" which starts
-# minirc on boot, creates TTY's and handles the killing of services on
+# busyrc on boot, creates TTY's and handles the killing of services on
 # shutdown.
 
 # Make sure 'rc' and other utilities are in PATH at boot, or use absolute paths
