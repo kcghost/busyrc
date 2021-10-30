@@ -118,10 +118,12 @@ Further configuration
 
 2. Local startup script
 
-   Minirc will run /etc/minirc.local on boot if the file exists and has the
+   Minirc will run /etc/rc.local on boot if the file exists and has the
    executable bit set. This allows the user to run commands in addition to the
    basic startup that minirc provides. This is a good place to load modules if
    udev does not detect that they should be loaded on boot.
+   
+   It will similiarly run /etc/rc.local_shutdown on shutdown.
 
 
 Usage of the user space program

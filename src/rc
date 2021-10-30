@@ -161,10 +161,10 @@ on_boot() {
 	echo_color 3 mounting rest of filesystems...
 	wait_on "mount -a"
 
-	# load /etc/minirc.local
-	if [ -x /etc/minirc.local ]; then
-		echo_color 3 loading /etc/minirc.local...
-		/etc/minirc.local
+	# load /etc/rc.local
+	if [ -x /etc/rc.local ]; then
+		echo_color 3 loading /etc/rc.local...
+		/etc/rc.local
 	fi
 }
 
@@ -179,10 +179,10 @@ on_shutdown() {
 		fi
 	done
 
-	# load minirc.local.shutdown
-	if [ -x /etc/minirc.local.shutdown ]; then
-		echo_color 3 loading /etc/minirc.local.shutdown...
-		/etc/minirc.local.shutdown
+	# load rc.local_shutdown
+	if [ -x /etc/rc.local_shutdown ]; then
+		echo_color 3 executing /etc/rc.local_shutdown...
+		/etc/rc.local_shutdown
 	fi
 
 	# shut down udev
