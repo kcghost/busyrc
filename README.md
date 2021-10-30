@@ -61,7 +61,7 @@ Installing on Arch or other distributions
 -----------------------------------------
 
 WARNING: Unknown if this project still works on Arch. You may want to take a
-look at the [original project](https://github.com/hut/busyrc) that has an AUR
+look at the [original project](https://github.com/hut/minirc) that has an AUR
 package.
 
 Dependencies: busybox, optionally eudev or systemd (for udev)
@@ -118,7 +118,7 @@ Further configuration
 
 2. Local startup script
 
-   Minirc will run /etc/rc.local on boot if the file exists and has the
+   Busyrc will run /etc/rc.local on boot if the file exists and has the
    executable bit set. This allows the user to run commands in addition to the
    basic startup that busyrc provides. This is a good place to load modules if
    udev does not detect that they should be loaded on boot.
