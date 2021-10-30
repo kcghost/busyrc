@@ -7,7 +7,12 @@ iptables_start() {
 
 iptables_stop() {
 	for table in $(cat /proc/net/ip_tables_names); do
-		iptables-restore < /var/lib/iptables/empty-"$table".rules
+		empty_file="/usr/share/iptables/empty-"$table".rules"
+		# Support older iptables intallations
+		if [ ! -f "${empty_file}" ]; then
+			empty_file="/var/lib/iptables/empty-"$table".rules"
+		fi
+		iptables-restore < "${empty_file}"
 	done
 }
 
