@@ -4,6 +4,7 @@ pkgs.stdenvNoCC.mkDerivation {
   name = "busyrc";
   src = ./.;
   buildInputs = [pkgs.which];
+  # TODO: Configure udhcpc to use busyrc's script as default
   propagatedBuildInputs = [
     (pkgs.busybox.override { extraConfig = ''
         CONFIG_INSTALL_APPLET_DONT y

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/busybox ash
 # Busybox udhcpc dispatcher script.
 # Copyright (C) 2009 by Axel Beckert.
 # Copyright (C) 2014 by Michael Tokarev.
@@ -7,7 +7,7 @@
 # package default.* scripts.
 
 RESOLV_CONF="/etc/resolv.conf"
-
+echo test >&2
 log() {
     logger -t "udhcpc[$PPID]" -p daemon.$1 "$interface: $2"
 }

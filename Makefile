@@ -1,6 +1,7 @@
 prefix = /usr/local
 exec_prefix=$(prefix)
 sbindir=$(exec_prefix)/sbin
+libexecdir = $(exec_prefix)/libexec
 sysconfdir=$(prefix)/etc
 datarootdir=$(prefix)/share
 datadir=$(datarootdir)
@@ -20,13 +21,14 @@ rc: src/rc.sh $(foreach service,$(services),src/services/$(service).sh)
 
 all: rc
 
-install: rc
+install:
 	install -Dm755 rc $(DESTDIR)$(sbindir)/rc
-	install -Dm644 src/busyrc.conf $(DESTDIR)$(sysconfdir)/busyrc.conf
+	install -Dm644 src/busyrc.conf.sh $(DESTDIR)$(sysconfdir)/busyrc.conf
 	install -Dm644 src/inittab $(DESTDIR)$(sysconfdir)/inittab
-	install -Dm644 src/_busyrc $(DESTDIR)$(datadir)/zsh/site-functions/_busyrc
-	install -Dm755 src/shutdown $(DESTDIR)$(sbindir)/shutdown
-	install -Dm755 src/bbwrap $(DESTDIR)$(sbindir)/bbwrap
+	install -Dm644 src/_busyrc.sh $(DESTDIR)$(datadir)/zsh/site-functions/_busyrc
+	install -Dm755 src/shutdown.sh $(DESTDIR)$(sbindir)/shutdown
+	install -Dm755 src/bbwrap.sh $(DESTDIR)$(sbindir)/bbwrap
+	install -Dm755 src/busyrc-udhcpc.script $(DESTDIR)$(libexecdir)/busyrc-udhcpc.script
 	for i in init halt poweroff reboot; do ln -sf $$(which busybox) $(DESTDIR)$(sbindir)/$$i; done
 
 check:
