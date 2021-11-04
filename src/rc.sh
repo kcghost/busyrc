@@ -250,7 +250,7 @@ fi
 if [ -z "${DAEMONS}" ]; then
 	DAEMONS="${ENABLED//@/}"
 	for dmn in ${SERVICES}; do
-		if daemon exists "${dmn}" && ! in_list ${dmn} ${DAEMONS}; then
+		if daemon exists "${dmn}" && ! in_list ${dmn} "${DAEMONS}"; then
 			DAEMONS="${DAEMONS} ${dmn}"
 		fi
 	done
