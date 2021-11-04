@@ -1,6 +1,7 @@
 prefix = /usr/local
 exec_prefix=$(prefix)
-sbindir=$(exec_prefix)/sbin
+# GNU Make recommends $(prefix)/sbin, but this doesn't really make sense in practice
+sbindir=/sbin
 libexecdir = $(exec_prefix)/libexec
 # GNU Make recommends $(prefix)/etc, but this doesn't really make sense in practice
 sysconfdir=/etc
@@ -23,17 +24,20 @@ out/%: src/%.sh src/path.sh $(foreach service,$(services),src/services/$(service
 	$< > $@
 	chmod +x $@
 
-all: out/rc out/shutdown
+all: out/rc out/shutdown out/busyrc-ifplugd.action out/busyrc-udhcpc.script
 
-install:
+install: all
 	install -Dm755 out/rc $(DESTDIR)$(sbindir)/rc
 	install -Dm755 out/shutdown $(DESTDIR)$(sbindir)/shutdown
-	install -Dm644 src/busyrc.conf.sh $(DESTDIR)$(sysconfdir)/busyrc.conf
-	install -Dm644 src/inittab $(DESTDIR)$(sysconfdir)/inittab
+	install -Dm755 out/busyrc-udhcpc.script $(DESTDIR)$(libexecdir)/busyrc-udhcpc.script
+	install -Dm755 out/busyrc-ifplugd.action $(DESTDIR)$(libexecdir)/busyrc-ifplugd.action
 	install -Dm644 src/_busyrc.sh $(DESTDIR)$(datadir)/zsh/site-functions/_busyrc
 	install -Dm755 src/bbwrap.sh $(DESTDIR)$(sbindir)/bbwrap
-	install -Dm755 src/busyrc-udhcpc.script.sh $(DESTDIR)$(libexecdir)/busyrc-udhcpc.script
 	for i in init halt poweroff reboot; do ln -sf $$(which busybox) $(DESTDIR)$(sbindir)/$$i; done
+
+install-conf:
+	install -Dm644 src/busyrc.conf.sh $(DESTDIR)$(sysconfdir)/busyrc.conf
+	install -Dm644 src/inittab $(DESTDIR)$(sysconfdir)/inittab
 
 check:
 	-shellcheck -ax -s dash src/rc

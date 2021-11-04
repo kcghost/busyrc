@@ -3,6 +3,7 @@
 # shutdown.
 
 # Make sure 'rc' and other utilities are in PATH at boot, or use absolute paths
+# TODO: /usr/local/sbin doesn't seem to be accurate, not really sure what the PATH is
 # Default init PATH is: /usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin
 # Could be different if another init exported PATH before launching busybox
 

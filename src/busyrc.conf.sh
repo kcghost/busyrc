@@ -14,7 +14,7 @@
 
 # This is a space-separated list of daemons which are run on boot. You may
 # prefix a daemon name with a "@" character to make it run in the background.
-ENABLED="@syslogd @klogd @udhcpc @sshd"
+ENABLED="@syslogd @klogd @alsa @ifplugd @sshd"
 
 # Choose the udev implementation."auto" prefers systemd to eudev to busybox
 #UDEV="auto"
@@ -23,6 +23,7 @@ ENABLED="@syslogd @klogd @udhcpc @sshd"
 #UDEV="busybox"
 
 # The device of the wired network
+# TODO: Yeah not always a wired network, it's just used by ifplugd
 NETWORK_INTERFACE="eno1"
 
 # The device of the wireless network
