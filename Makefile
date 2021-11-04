@@ -2,7 +2,8 @@ prefix = /usr/local
 exec_prefix=$(prefix)
 sbindir=$(exec_prefix)/sbin
 libexecdir = $(exec_prefix)/libexec
-sysconfdir=$(prefix)/etc
+# GNU Make recommends $(prefix)/etc, but this doesn't really make sense in practice
+sysconfdir=/etc
 datarootdir=$(prefix)/share
 datadir=$(datarootdir)
 
