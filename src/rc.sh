@@ -196,10 +196,10 @@ daemon() {
 			;;
 	esac
 	
-	if command -v "${2}"_"${1}" >/dev/null 2>&1; then
-		"${2}"_"${1}"
+	if command -v "${2}_${1}" >/dev/null 2>&1; then
+		eval "${2}_${1}"
 	else
-		default_"${1}" "${2}"
+		eval "default_${1} \"${2}\""
 	fi
 }
 
