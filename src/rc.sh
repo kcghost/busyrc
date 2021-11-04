@@ -11,30 +11,7 @@
 # In NixOS the shebang is automatically rewritten to use a busybox with these features (but not actually install it to PATH)
 # Assume busybox ash shell features and prefer builtins or nofork applets
 
-PATH="$PATH:/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin" # traditonal linux paths
-PATH="$PATH:/usr/lib/systemd" # systemd libexec components normally hidden from PATH
-PATH="$PATH:/run/current-system/sw/bin:/run/current-system/sw/sbin:/run/wrappers/bin" # NixOS standard path
-PATH="$PATH:/run/current-system/sw/lib/systemd" # systemd libexec components in NixOS
-
-# Some busybox installations might not have SH_STANDALONE or PREFER_APPLETS features
-# So the some applets supported by busybox might not be in PATH if symlinks were not created
-# Or other "full" versions of the same utilties (with possibly annoyingly different behavior) might be in PATH
-# For consistency, prefer the full set of busybox applets whereever possible
-# Find applets supported by busybox and define functions for them so they can be called normally
-if command -v "busybox" >/dev/null 2>&1; then
-	for cmd in $(busybox --list); do
-		# Note: Removing PATH and just testing for an exit value rather than
-		# comparing string output (command -v = cmd) is a major speed improvement
-		if ! PATH="" command -v "${cmd}" >/dev/null 2>&1; then
-			# cmd is supported by busybox but no builtin is available
-			# Define an alias so it can be used without prepending 'busybox'
-			# Note: bash would need expand_aliases to use aliases in non-interactive mode, ash does not
-			# Note: alias is more powerful at creating names than function is, 
-			# as it can use hyphens and possibly other special characters (in ash, not guaranteed by POSIX)
-			eval "alias ${cmd}=\"busybox ${cmd}\""
-		fi
-	done
-fi
+@path_include@
 
 # Fallback Configuration Values, to be able to run even with a broken, deleted
 # or outdated busyrc.conf:

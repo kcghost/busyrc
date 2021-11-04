@@ -1,13 +1,10 @@
-##!/bin/busybox ash
+#!/bin/busybox ash
 # shellcheck shell=dash
 # shellcheck disable=SC3057
 
-PATH="$PATH:/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin" # traditonal linux paths
-PATH="$PATH:/usr/lib/systemd" # systemd libexec components normally hidden from PATH
-PATH="$PATH:/run/current-system/sw/bin:/run/current-system/sw/sbin:/run/wrappers/bin" # NixOS standard path
-PATH="$PATH:/run/current-system/sw/lib/systemd" # systemd libexec components in NixOS
+@path_include@
 
-# Note: Busybox has a shutdown implementations example in its sources that bills itself as:
+# Note: Busybox has a shutdown implementation example in its sources that bills itself as:
 # "Replaces traditional overdesigned shutdown mechanism". It's way overdesigned.
 
 # TODO: Support kexec?
@@ -103,7 +100,12 @@ if [ -z "${wall_message}" ]; then
 	fi
 fi
 
-echo "${wall_message}" | wall
+# TODO: busybox doesn't have 'wall', is there a more portable method?
+if command -v "wall" >/dev/null 2>&1; then
+	echo "${wall_message}" | wall
+else
+	echo "Wall not found! Would have broadcasted: ${wall_message}"
+fi
 #echo "${cmd} -d ${seconds}${extra_args}"
 eval "${cmd} -d ${seconds}${extra_args}"
 
