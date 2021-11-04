@@ -65,7 +65,7 @@ main() {
 # Wait in default polling manner on a condition
 wait_on() {
 	for i in $(seq "${2:-${WAIT_TRIES}}"); do
-		${1} && return 0
+		eval "${1}" && return 0
 		sleep "${3:-${WAIT_POLLRATE}}"
 	done
 	echo "ERROR: Gave up waiting on condition ${1}! You should debug this to avoid wasting time in init!"

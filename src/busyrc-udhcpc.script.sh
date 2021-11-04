@@ -1,0 +1,73 @@
+#!/bin/busybox ash
+# Busybox udhcpc dispatcher script.
+# Copyright (C) 2009 by Axel Beckert.
+# Copyright (C) 2014 by Michael Tokarev.
+#
+# Based on the busybox example scripts and the old udhcp source
+# package default.* scripts.
+
+@path_include@
+
+RESOLV_CONF="/etc/resolv.conf"
+
+log() {
+	logger -t "udhcpc[$PPID]" -p daemon.$1 "$interface: $2"
+}
+
+case $1 in
+	bound|renew)
+		# Configure new IP address.
+		# Do it unconditionally even if the address hasn't changed,
+		# to also set subnet, broadcast, mtu, ...
+		ifconfig $interface ${mtu:+mtu $mtu} \
+			$ip netmask $subnet ${broadcast:+broadcast $broadcast}
+
+		# get current ("old") routes (after setting new IP)
+		crouter=$(ip -4 route show dev $interface | awk '$1 == "default" { print $3; }')
+		router="${router%% *}" # linux kernel supports only one (default) route
+		if [ ".$router" != ".$crouter" ]; then
+			# reset just default routes
+			ip -4 route flush exact 0.0.0.0/0 dev $interface
+		fi
+		if [ -n "$router" ]; then
+			# special case for /32 subnets: use onlink keyword
+			[ ".$subnet" = .255.255.255.255 ] \
+				&& onlink=onlink || onlink=
+			ip -4 route add default via $router dev $interface $onlink
+		fi
+
+		# Update resolver configuration file
+		[ -n "$domain" ] && R="domain $domain" || R=""
+		for i in $dns; do
+			R="$R
+nameserver $i"
+		done
+
+		# TODO: Just testing for the existence of resolvconf is bad, since it may not be working
+		# systemd resolvconf fails to operate if systemd is not running
+		# Maybe provide a resolvconf?
+		if [ -x /sbin/resolvconf ]; then
+			echo "$R" | resolvconf -a "$interface.udhcpc"
+		else
+			echo "$R" > "$RESOLV_CONF"
+		fi
+
+		log info "$1: IP=$ip/$subnet router=$router domain=\"$domain\" dns=\"$dns\" lease=$lease"
+		;;
+	deconfig)
+		ip link set $interface up
+		ip -4 addr flush dev $interface
+		ip -4 route flush dev $interface
+		[ -x /sbin/resolvconf ] &&
+			resolvconf -d "$interface.udhcpc"
+		log notice "deconfigured"
+		;;
+	leasefail | nak)
+		log err "configuration failed: $1: $message"
+		;;
+	*)
+		echo "$0: Unknown udhcpc command: $1" >&2
+		exit 1
+		;;
+esac
+
