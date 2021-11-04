@@ -12,16 +12,15 @@
 # Setup login shells
 # You could use "-/bin/sh" for a direct login shell
 # or "agetty -a root tty1 linux" for autologin
-# A graphical display manager is traditionally launched on tty7
 # Login shells are normally launched on TTYs 1-6
-# But TTY1 has useful messages from the kernel and early init, so skip TTY1
-#tty1::respawn:agetty tty1 linux
+# A graphical display manager is traditionally launched on tty7
+tty1::respawn:agetty tty1 linux
 tty2::respawn:agetty tty2 linux
 tty3::respawn:agetty tty3 linux
 tty4::respawn:agetty tty4 linux
 tty5::respawn:agetty tty5 linux
 tty6::respawn:agetty tty6 linux
-#tty7::respawn:sddm
+tty7::respawn:agetty tty7 linux
 
 # Shutdown when pressing CTRL+ALT+DEL (disabled by default)
 #::ctrlaltdel:kill -USR2 1
