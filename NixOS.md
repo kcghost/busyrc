@@ -122,10 +122,28 @@ nix-os-rebuild calls the `switch-to-configuration` perl script, which is closely
 Specifically the switch will fail when the script attempts to communciate with systemd over dbus, it looks for "org.freedesktop.systemd1".
 Thankfully the script quits out before any of that when called for "boot" instead.
 
+`pulseaudio` also needs a restart for some reason.
+
 A workaround command `nixos-switch` is installed that just does the following:
 ```
-sudo nixos-rebuild boot
-sudo /nix/var/nix/profiles/system/activate
+nixos-rebuild boot
+/nix/var/nix/profiles/system/activate
+rc restart pulseaudio
+```
+
+ntfs mounts
+-----------
+
+If you follow the [recommended instructions for mounting an NTFS filesystem with read-write capability](https://nixos.wiki/wiki/NTFS) you'll find that it no longer works under busyrc, it just mounts read-only.
+The reason for this is that NixOS generates a slightly non-standard /etc/fstab with "ntfs" as the fs-type rather than the FUSE module "ntfs-3g". Technically this means that it should use the builtin kernel NTFS support, and typically the kernel doesn't have write support enabled. The normal `mount` command in NixOS knows to use the FUSE module anyway (maybe it knows the kernel doesn't have the write support?), busybox mount does not.
+
+To workaround this, just remove NTFS entries from `hardware-configuration.nix` and use the following pattern for defining your NTFS mount pounts:
+```
+  fileSystems."/path/to/mount/to" =
+    { device = "/path/to/the/device";
+      fsType = "ntfs-3g"; 
+      options = [ "rw" "uid=theUidOfYourUser"];
+    };
 ```
 
 NixOS Notes

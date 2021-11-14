@@ -208,7 +208,9 @@ default_start() {
 }
 
 default_stop() {
+	# Note: Busybox killall does not implement -w(wait) option
 	killall "${1}"
+	wait_on "! pidof \"${1}\" >/dev/null 2>&1"
 }
 
 default_restart() {
