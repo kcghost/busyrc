@@ -10,7 +10,7 @@ datadir=$(datarootdir)
 
 services = $(basename $(notdir $(wildcard src/services/*.sh)))
 
-.PHONY: all install check clean
+.PHONY: all install install-conf install-nix check clean
 
 out/%: src/%.sh src/path.sh $(foreach service,$(services),src/services/$(service).sh)
 	sed \
@@ -38,6 +38,9 @@ install: all
 install-conf:
 	install -Dm644 src/busyrc.conf.sh $(DESTDIR)$(sysconfdir)/busyrc.conf
 	install -Dm644 src/inittab $(DESTDIR)$(sysconfdir)/inittab
+
+install-nix:
+	install -Dm755 src/nixos-switch $(DESTDIR)$(sbindir)/nixos-switch
 
 check:
 	-shellcheck -ax -s dash src/rc

@@ -17,11 +17,6 @@ pkgs.stdenvNoCC.mkDerivation {
   ];
   installFlags = [ "prefix=/" "DESTDIR=$(out)" ];
   postInstall = ''
-    mkdir -p "$out/bin"
-    echo "#!$(which busybox) ash" >> "$out/bin/nixos-switch"
-    echo "set -e" >> "$out/bin/nixos-switch"
-    echo "nixos-rebuild boot" >> "$out/bin/nixos-switch"
-    echo "/nix/var/nix/profiles/system/activate" >> "$out/bin/nixos-switch"
-    chmod +x "$out/bin/nixos-switch"
+    make prefix=/ DESTDIR=\$\(out\) install-nix
   '';
 }
