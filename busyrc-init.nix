@@ -13,7 +13,7 @@ in {
   environment.etc = {
     "busyrc.conf".text = ''
       UDEV="systemd"
-      ENABLED="@syslogd @klogd @dbus @acpid @tmpfiles @nixdaemon @dhcpcd @alsa @upowerd${pulseaudiod}${sshd}${dockerd}"
+      ENABLED="@syslogd @klogd @dbus @acpid @systemd-tmpfiles @systemd-modules-load @nixdaemon @dhcpcd @alsa @upowerd${pulseaudiod}${sshd}${dockerd}"
       NETWORK_INTERFACE="eno1"
     '';
     "inittab".text = ''
