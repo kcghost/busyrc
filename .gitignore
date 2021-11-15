@@ -2,4 +2,4 @@ rc
 notes
 src/test.sh
 out/*
-
+bin-tmp
