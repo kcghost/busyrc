@@ -1,0 +1,5 @@
+#!/bin/busybox ash
+
+nixos-rebuild boot
+/nix/var/nix/profiles/system/activate
+rc restart pulseaudio
