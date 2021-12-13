@@ -1,4 +1,6 @@
-{config, pkgs, ...}:
+{config, lib, pkgs, ...}:
+
+with lib;
 
 let
   busyrc-pkg = (pkgs.callPackage ./. {});
@@ -11,12 +13,12 @@ in {
   hardware.pulseaudio.systemWide = true;
 
   environment.etc = {
-    "busyrc.conf".text = ''
+    "busyrc.conf".text = mkDefault ( ''
       UDEV="systemd"
       ENABLED="@syslogd @klogd @dbus @acpid @systemd-tmpfiles @systemd-modules-load @nixdaemon @dhcpcd @alsa @upowerd${pulseaudiod}${sshd}${dockerd}"
       NETWORK_INTERFACE="eno1"
-    '';
-    "inittab".text = ''
+    '');
+    "inittab".text = mkDefault ( ''
       # Start "rc init" on boot
       ::sysinit:/run/current-system/sw/bin/rc init
 
@@ -49,7 +51,7 @@ in {
       ::shutdown:echo :: unmounting everything
       ::shutdown:/run/current-system/sw/bin/umount -a -r
       ::shutdown:/run/current-system/sw/bin/mount -o remount,ro /
-    '';
+    '');
 
     # Can't get 'let' variables directly afaik, so grab dhcpcdConf from dhcpcd.nix by grabbing it from systemd
     # This assumes an ExecStart with a --config argument, this might break in time
