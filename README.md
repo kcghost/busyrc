@@ -57,6 +57,27 @@ Carefully read through the known issues and workarounds in
 [this document](NixOS.md) before installing. It contains helpful details on how 
 to use startx and why the above workarounds are necessary.
 
+busyrc provides defaults for both /etc/inittab and /etc/busyrc.conf.
+The default configuration is not guaranteed to start every service NixOS would 
+normally provide, it only checks for a few important ones.
+
+Both files may be overridden in the following manner:
+```
+  environment.etc = {
+    "busyrc.conf".text = ''
+      UDEV="systemd"
+      ENABLED="@syslogd @klogd @dbus @acpid @systemd-tmpfiles @systemd-modules-load @nixdaemon @mycustomservice"
+      NETWORK_INTERFACE="eno1"
+    '';
+
+    "inittab".text = ''
+      ::sysinit:/run/current-system/sw/bin/rc init
+      etc
+    '';
+  };
+
+```
+
 Installing on Arch or other distributions
 -----------------------------------------
 
