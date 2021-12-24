@@ -2,13 +2,13 @@
 # busyrc on boot, creates TTY's and handles the killing of services on
 # shutdown.
 
-# Make sure 'rc' and other utilities are in PATH at boot, or use absolute paths
-# TODO: /usr/local/sbin doesn't seem to be accurate, not really sure what the PATH is
-# Default init PATH is: /usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin
-# Could be different if another init exported PATH before launching busybox
+# It is safest to use absolute paths, as PATH doesn't have a set-in-stone value
+# It is likely to be: PATH=/sbin:/usr/sbin:/bin:/usr/bin
+# But could change by busybox implementation of if another init exports PATH
+# before starting busybox
 
 # Start "rc init" on boot
-::sysinit:rc init
+::sysinit:/sbin/rc init
 
 # Setup login shells
 # You could use "-/bin/sh" for a direct login shell
