@@ -89,6 +89,7 @@ Dependencies: busybox, optionally eudev or systemd (for udev)
 
 ```
 sudo make install
+sudo make install-conf
 ```
 
 Then find a way to point init in your Linux distribution to busybox init, should
