@@ -9,8 +9,7 @@ PATH=""
 
 case $action in
 	up)
-		# TODO: Figure out libexec path, this won't work on NixOS...
-		udhcpc -i ${iface} -n -q -S -s /usr/local/libexec/busyrc-udhcpc.script
+		udhcpc -i ${iface} -n -q -S -s /etc/busyrc/udhcpc.script
 		;;
 	down)
 		# TODO: Is anything needed here?

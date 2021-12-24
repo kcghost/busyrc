@@ -244,8 +244,8 @@ in_list() {
 # Define all services in src/services/ and a SERVICES variable listing them
 @services_include@
 
-if [ -r /etc/busyrc.conf ]; then
-	. /etc/busyrc.conf
+if [ -r /etc/busyrc/busyrc.conf ]; then
+	. /etc/busyrc/busyrc.conf
 fi
 
 # Populate a reasonable default for DAEMONS

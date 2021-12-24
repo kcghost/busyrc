@@ -10,11 +10,11 @@
 # The default lists all existing services known from built in sources (SERVICES) and ENABLED
 # If you define services in busyrc.conf consider adding to SERVICES to make use
 # of the default DAEMONS list, or just define a full DAEMONS list yourself
-#DAEMONS="syslogd klogd crond dbus wpa_supplicant dhcpcd sshd privoxy polipo acpid mpd vsftpd lighttpd ntpd nixdaemon pulseaudio dockerd"
+@daemons_include@
 
 # This is a space-separated list of daemons which are run on boot. You may
 # prefix a daemon name with a "@" character to make it run in the background.
-ENABLED="@syslogd @klogd @alsa @ifplugd @sshd"
+ENABLED="@syslogd @klogd @alsa @dbus @upowerd @wpa_supplicant @ifplugd @sshd"
 
 # Choose the udev implementation."auto" prefers systemd to eudev to busybox
 #UDEV="auto"
@@ -22,12 +22,14 @@ ENABLED="@syslogd @klogd @alsa @ifplugd @sshd"
 #UDEV="eudev"
 #UDEV="busybox"
 
-# The device of the wired network
-# TODO: Yeah not always a wired network, it's just used by ifplugd
-NETWORK_INTERFACE="eno1"
+# List of interfaces which should be monitored by ifplugd (for automatic DHCP)
+# Typically all wired and wireless interfaces
+#NETWORK_INTERFACES="eth0 wlan0"
+@networks_include@
 
-# The device of the wireless network
-#WIFI_INTERFACE="wlan0"
+# List of interfaces which should be passed to wpa_supplicant
+#WIFI_INTERFACES="wlan0"
+@wireless_include@
 
 # How long to wait between waiting for a condition to be satisfied 
 # (like a device to come up) and how many times to try

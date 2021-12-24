@@ -57,7 +57,7 @@ Carefully read through the known issues and workarounds in
 [this document](NixOS.md) before installing. It contains helpful details on how 
 to use startx and why the above workarounds are necessary.
 
-busyrc provides defaults for both /etc/inittab and /etc/busyrc.conf.
+busyrc provides defaults for both /etc/inittab and /etc/busyrc/busyrc.conf.
 The default configuration is not guaranteed to start every service NixOS would 
 normally provide, it only checks for a few important ones.
 
@@ -67,7 +67,7 @@ Both files may be overridden in the following manner:
     "busyrc.conf".text = ''
       UDEV="systemd"
       ENABLED="@syslogd @klogd @dbus @acpid @systemd-tmpfiles @systemd-modules-load @nixdaemon @mycustomservice"
-      NETWORK_INTERFACE="eno1"
+      NETWORK_INTERFACES="eno1"
     '';
 
     "inittab".text = ''
@@ -97,8 +97,12 @@ be /sbin/init. (Double check /sbin/init is a symlink to busybox).
 From there busybox init will make use of /etc/inittab, which calls the rc script
 for system initialization.
 
-You will want to configure /etc/busyrc.conf to your needs. It contains
-informations on how to define new daemons or override existing ones.
+By default `make install-conf` attempts to autodetermine NETWORK_INTERFACES
+and WIRELESS_INTERFACES based on active interfaces,
+setting them up for basic ifplugd DHCP support and wpa_supplicant support.
+
+You will want to configure /etc/busyrc/busyrc.conf to your needs. It contains
+information on how to define new daemons or override existing ones.
 See sections "Dealing with services" and "Further configuration".
 
 Reboot.
@@ -116,11 +120,11 @@ time so you can boot quickly, but it may require additional logic to wait for
 another service or resource first.
 
 You can override DAEMONS, ENABLED, and define or override services in
-/etc/busyrc.conf.  This file is simply sourced by the script right after 
+/etc/busyrc/busyrc.conf.  This file is simply sourced by the script right after 
 defining the default variables.
 
 To add or override another service you must define the appropriate actions of 
-that service. See the comments in [busyrc.conf](busyrc.conf) for details.
+that service. See the comments in [src/busyrc.conf.sh](busyrc.conf) for details.
 
 Further configuration
 ---------------------
