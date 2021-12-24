@@ -8,5 +8,5 @@ ifplugd_start() {
 	#udhcpc -i ${NETWORK_INTERFACE} -S -s /usr/local/libexec/busyrc-udhcpc.script
 	# TODO: Figure out portable libexec
 	# TODO: Support maybe a whole list of network interfaces that should be ifplug monitored?
-	ifplugd -i ${NETWORK_INTERFACE} -r /usr/local/libexec/busyrc-ifplugd.action
+	ifplugd -F -i ${NETWORK_INTERFACE} -r /usr/local/libexec/busyrc-ifplugd.action
 }
