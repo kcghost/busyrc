@@ -130,6 +130,11 @@ on_boot() {
 
 	echo_color 3 setting fd link...	
 	ln -s /proc/self/fd /dev/fd
+	
+	if [ -x /etc/rc.local ]; then
+		echo_color 3 executing /etc/rc.local...
+		/etc/rc.local
+	fi
 
 	# start the default daemons
 	echo_color 3 starting daemons...
@@ -143,11 +148,6 @@ on_boot() {
 	
 	echo_color 3 mounting rest of filesystems...
 	wait_on "mount -a"
-
-	if [ -x /etc/rc.local ]; then
-		echo_color 3 executing /etc/rc.local...
-		/etc/rc.local
-	fi
 }
 
 on_shutdown() {
