@@ -13,7 +13,7 @@ in {
   hardware.pulseaudio.systemWide = true;
 
   environment.etc = {
-    "busyrc.conf".text = mkDefault ( ''
+    "busyrc/busyrc.conf".text = mkDefault ( ''
       UDEV="systemd"
       ENABLED="@syslogd @klogd @dbus @acpid @systemd-tmpfiles @systemd-modules-load @nixdaemon @dhcpcd @alsa @upowerd${pulseaudiod}${sshd}${dockerd}"
       NETWORK_INTERFACE="eno1"

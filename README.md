@@ -64,7 +64,7 @@ normally provide, it only checks for a few important ones.
 Both files may be overridden in the following manner:
 ```
   environment.etc = {
-    "busyrc.conf".text = ''
+    "busyrc/busyrc.conf".text = ''
       UDEV="systemd"
       ENABLED="@syslogd @klogd @dbus @acpid @systemd-tmpfiles @systemd-modules-load @nixdaemon @mycustomservice"
       NETWORK_INTERFACES="eno1"
