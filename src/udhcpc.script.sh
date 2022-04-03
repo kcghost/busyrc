@@ -43,14 +43,9 @@ case $1 in
 nameserver $i"
 		done
 
-		# TODO: Just testing for the existence of resolvconf is bad, since it may not be working
-		# systemd resolvconf fails to operate if systemd is not running
-		# Maybe provide a resolvconf?
-		if [ -x /sbin/resolvconf ]; then
-			echo "$R" | resolvconf -a "$interface.udhcpc"
-		else
-			echo "$R" > "$RESOLV_CONF"
-		fi
+		# If you want to use resolvconf:
+		#echo "$R" | resolvconf -a "$interface.udhcpc"
+		echo "$R" > "$RESOLV_CONF"
 
 		log info "$1: IP=$ip/$subnet router=$router domain=\"$domain\" dns=\"$dns\" lease=$lease"
 		;;
