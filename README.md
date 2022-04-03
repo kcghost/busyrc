@@ -61,7 +61,7 @@ busyrc provides defaults for both /etc/inittab and /etc/busyrc/busyrc.conf.
 The default configuration is not guaranteed to start every service NixOS would 
 normally provide, it only checks for a few important ones.
 
-Both files may be overridden in the following manner:
+Imporant inti scripts can be defined and overidden in the following manner:
 ```
   environment.etc = {
     "busyrc/busyrc.conf".text = ''
@@ -72,8 +72,14 @@ Both files may be overridden in the following manner:
 
     "inittab".text = ''
       ::sysinit:/run/current-system/sw/bin/rc init
-      etc
     '';
+    "rc.local" = {
+        text = ''
+          #!/bin/sh
+          modprobe fuse
+        '';
+        mode = "0744";
+    };
   };
 
 ```
