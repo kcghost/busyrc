@@ -61,7 +61,11 @@ in {
   };
   
   # Expose acpid which isn't normally in PATH, link config dir in default spot
-  security.wrappers.acpid.source = "${pkgs.acpid}/bin/acpid";
+  security.wrappers.acpid = {
+    source = "${pkgs.acpid}/bin/acpid";
+    owner = "root";
+    group = "root";
+  };
   # Some odd quoting needs to be worked around here, might break in time
   system.activationScripts.acpidlink.text = ''
     mkdir -p /etc/acpi/
