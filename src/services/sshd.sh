@@ -1,5 +1,6 @@
 
 sshd_start() {
+	mkdir -p /run/sshd
 	eval "$(command -v sshd)"  # sshd requires an absolute path, so grab path from command -v
 }
 
