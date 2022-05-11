@@ -22,6 +22,7 @@ tty4::respawn:agetty tty4 linux
 tty5::respawn:agetty tty5 linux
 tty6::respawn:agetty tty6 linux
 tty7::respawn:agetty tty7 linux
+#tty7::respawn:agetty -a your_username tty7 linux
 
 # Shutdown when pressing CTRL+ALT+DEL (disabled by default)
 #::ctrlaltdel:kill -USR2 1

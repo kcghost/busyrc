@@ -3,6 +3,74 @@ NixOS Known Issues and Workarounds
 
 Look here first if you are running into trouble with your NixOS configuration.
 
+**WARNING**: This project no longer specifically targets NixOS. This is because
+NixOS in general eventually caused this author enough chagrin to give up on it.
+It should still work, but it is even less well tested than it was before.
+
+
+Installing on NixOS
+--------------------------------------------------------------------------------
+
+**WARNING**: This whole project is experimental and you are practically
+guaranteed to encounter some issues using it. NixOS has a convenient rollback
+system that integrates into your bootloader, you might need to use it.
+Carefully read through this whole document before installing so you know abit of
+what you are getting yoursefl into.
+
+Quick start:
+Clone this repository and put the following in your `configuration.nix`:
+
+```
+  imports =
+    [ # Include the results of the hardware scan.
+      ./hardware-configuration.nix
+      <path-to>/busyrc/busyrc-init.nix
+    ];
+```
+
+Only the startx display manager is supported right now, so you will also need:
+```
+services.xserver.displayManager.startx.enable = true;
+```
+
+You will also need to add audio, input, and video groups to your login users:
+```
+  users.users.nixuser = {
+    isNormalUser = true;
+    extraGroups = [ "audio" "input" "video" ];
+    hashedPassword = "<hashed_password>;
+  };
+```
+
+Then `sudo nixos-rebuild boot` and reboot.
+
+busyrc provides defaults for both /etc/inittab and /etc/busyrc/busyrc.conf.
+The default configuration is not guaranteed to start every service NixOS would 
+normally provide, it only checks for a few important ones.
+
+Imporant init scripts can be defined and overidden in the following manner:
+```
+  environment.etc = {
+    "busyrc/busyrc.conf".text = ''
+      UDEV="systemd"
+      ENABLED="@syslogd @klogd @dbus @acpid @systemd-tmpfiles @systemd-modules-load @nixdaemon @mycustomservice"
+      NETWORK_INTERFACES="eno1"
+    '';
+
+    "inittab".text = ''
+      ::sysinit:/run/current-system/sw/bin/rc init
+    '';
+    "rc.local" = {
+        text = ''
+          #!/bin/sh
+          modprobe fuse
+        '';
+        mode = "0744";
+    };
+  };
+
+```
+
 startx
 ------
 
@@ -308,7 +376,7 @@ This was a huge pain to debug, and I don't understand why this service is necess
 systemd-tmpfiles and opengl drivers
 -----------------------------------
 
-Another odd issue with starting X is that KDE initially refused to start without the follwing hack in `.xinitrc`:
+Another odd issue with starting X is that KDE initially refused to start without the following hack in `.xinitrc`:
 ```
 export QT_XCB_GL_INTEGRATION=none
 exec startplasma-x11
