@@ -38,9 +38,12 @@ all: out/rc out/shutdown out/busyrc.conf out/ifplugd.action out/udhcpc.script
 
 install: all
 	install -Dm755 out/rc $(DESTDIR)$(sbindir)/rc
-	install -Dm755 out/shutdown $(DESTDIR)$(sbindir)/shutdown
 	install -Dm644 src/_busyrc.sh $(DESTDIR)$(datadir)/zsh/site-functions/_busyrc
 	install -Dm755 src/bbwrap.sh $(DESTDIR)$(sbindir)/bbwrap
+	-mv $(DESTDIR)$(sbindir)/shutdown $(DESTDIR)$(sbindir)/shutdown.oldinit
+	-mv /usr/lib/tmpfiles.d/systemd-nologin.conf /usr/lib/tmpfiles.d/systemd-nologin.conf.oldconf
+	install -Dm755 out/shutdown $(DESTDIR)$(sbindir)/shutdown
+	-for i in init halt poweroff reboot; do mv -n $(DESTDIR)$(sbindir)/$$i $(DESTDIR)$(sbindir)/$$i.oldinit; done
 	for i in init halt poweroff reboot; do ln -sf $$(which busybox) $(DESTDIR)$(sbindir)/$$i; done
 
 install-conf: all
@@ -48,7 +51,12 @@ install-conf: all
 	install -Dm755 out/udhcpc.script $(DESTDIR)$(sysconfdir)/busyrc/udhcpc.script
 	install -Dm755 out/ifplugd.action $(DESTDIR)$(sysconfdir)/busyrc/ifplugd.action
 	install -Dm644 src/inittab $(DESTDIR)$(sysconfdir)/inittab
-
+	
+uninstall:
+	-mv /usr/lib/tmpfiles.d/systemd-nologin.conf.oldconf /usr/lib/tmpfiles.d/systemd-nologin.conf
+	-mv $(DESTDIR)$(sbindir)/shutdown.oldinit $(DESTDIR)$(sbindir)/shutdown
+	for i in init halt poweroff reboot; do mv -n $(DESTDIR)$(sbindir)/$$i.oldinit $(DESTDIR)$(sbindir)/$$i; done
+	
 install-nix:
 	install -Dm755 src/nixos-switch $(DESTDIR)$(sbindir)/nixos-switch
 
@@ -60,4 +68,3 @@ check:
 
 clean:
 	rm -f out/*
-
