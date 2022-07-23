@@ -97,9 +97,10 @@ on_boot() {
 	echo_color 3 setting up loopback device...
 	ip link set up dev lo
 
-	# Consider modprobing these in case udev fails?
-	#modprobe xhci_hcd
-	#modprobe usbhid
+	echo_color 3 inserting keyboard modules for emergencies...
+	modprobe xhci_hcd
+	modprobe usbhid
+	modprobe atkbd
 
 	echo_color 3 initializing udev...
 	if [ "${UDEV}" = "auto" ]; then
