@@ -121,7 +121,6 @@ exec startlxqt
 
 ```
 exec startxfce4
-
 ```
 
 #### MATE

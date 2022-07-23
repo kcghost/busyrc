@@ -14,7 +14,7 @@
 
 # This is a space-separated list of daemons which are run on boot. You may
 # prefix a daemon name with a "@" character to make it run in the background.
-ENABLED="@syslogd @klogd @alsa @dbus @upowerd @systemd-tmpfiles @systemd-modules-load @udhcpc @sshd"
+ENABLED="@syslogd @klogd @alsa @dbus @upowerd @systemd-tmpfiles @systemd-modules-load @udhcpc @sshd @cupsd @avahi-daemon @cups-browsed"
 
 # Choose the udev implementation."auto" prefers systemd to eudev to busybox
 #UDEV="auto"
