@@ -89,7 +89,7 @@ Further configuration
 
 You need to decide what to use to set up the devices and load the modules.
 busyrc supports busybox's mdev, systemd's udev, and a fork of udev, eudev, by default.
-You can change the udev system by writing UDEV=busybox, UDEV=systemd, or UDEV=eudev respectively into /etc/busyrc.conf.
+You can change the udev system by writing `UDEV=busybox`, `UDEV=systemd`, or U`DEV=eudev` respectively into `/etc/busyrc.conf`.
 
 eudev and systemd's udev work out of the box, so they are recommended.
 To set up mdev, you can use [this as a reference](https://github.com/slashbeast/mdev-like-a-boss).
@@ -116,7 +116,7 @@ Run "rc --help" for information.  Never run "rc init" except during the boot pro
 User services
 -------------
 
-The default inittab configuration starts console login shells on TTYs 1-7.
+The `/etc/inittab` configuration starts console login shells on TTYs 1-7.
 It is recommended to change the TTY7 line to automatically login your primary user:
 ```
 tty7::respawn:agetty -a your_username tty7 linux
