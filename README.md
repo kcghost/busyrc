@@ -87,9 +87,11 @@ Further configuration
 
 ### udev
 
-You need to decide what to use to set up the devices and load the modules.
-busyrc supports busybox's mdev, systemd's udev, and a fork of udev, eudev, by default.
-You can change the udev system by writing `UDEV=busybox`, `UDEV=systemd`, or U`DEV=eudev` respectively into `/etc/busyrc.conf`.
+You may need to decide what `udev` flavor to use that will set up devices and load modules.
+
+busyrc supports busybox's mdev, systemd's udev, and eudev.
+You can change the udev system by writing `UDEV=busybox`, `UDEV=systemd`, or `UDEV=eudev` respectively into `/etc/busyrc.conf`.
+The default `auto` setting will prefer systemd to eudev to busybox, checking for the existence of each.
 
 eudev and systemd's udev work out of the box, so they are recommended.
 To set up mdev, you can use [this as a reference](https://github.com/slashbeast/mdev-like-a-boss).
