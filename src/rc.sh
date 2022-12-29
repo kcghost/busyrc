@@ -25,14 +25,24 @@ WAIT_POLLRATE="0.1"
 WAIT_TRIES="30"
 read -r HOSTNAME </etc/hostname
 
+require_sudo() {
+	if [ $(id -u) != 0 ]; then
+		echo "error: requested operation requires superuser privilege"
+		exit 1
+	fi
+}
+
 main() {
 	# handle arguments
 	case "$1" in
 	init)
+		require_sudo
 		on_boot;;
 	shutdown)
+		require_sudo
 		on_shutdown;;
 	start|stop|restart)
+		require_sudo
 		cmd="$1"
 		shift
 		for dmn in ${@}; do
