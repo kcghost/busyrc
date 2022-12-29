@@ -35,7 +35,7 @@ main() {
 	start|stop|restart)
 		cmd="$1"
 		shift
-		for dmn in ${@:-${DAEMONS}}; do
+		for dmn in ${@}; do
 			daemon "${cmd}" "${dmn}"
 		done;;
 	''|list)
