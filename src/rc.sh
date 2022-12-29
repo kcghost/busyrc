@@ -215,10 +215,12 @@ daemon() {
 }
 
 default_start() {
+	# Note: This doesn't work with aliased commands
 	"${1}"
 }
 
 default_stop() {
+	# TODO: This won't work for aliased commands, and doesn't use poll
 	# Note: Busybox killall does not implement -w(wait) option
 	killall "${1}"
 	wait_on "! pidof \"${1}\" >/dev/null 2>&1"
@@ -230,7 +232,8 @@ default_restart() {
 }
 
 default_poll() {
-	pgrep "(^|/)${1}\$" >/dev/null 2>&1
+	# Note: First word is 'busybox' on aliased commands, so fall back to grepping for that case
+	pidof "${1}" >/dev/null 2>&1 || ps | grep "${busybox_path}[ ]${1}" >/dev/null 2>&1
 }
 
 default_exists() {
