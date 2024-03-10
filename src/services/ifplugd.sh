@@ -1,10 +1,13 @@
 
+try_ifplugd() {
+	echo_color 3 "waiting for interface ${1}..."
+	wait_on "netif_exists ${1}"
+	echo_color 3 "interface ${1} is available, starting ifplugd for it"
+	ifplugd -I -F -i ${1} -r /etc/busyrc/ifplugd.action
+}
+
 ifplugd_start() {
-	for NETWORK_INTERFACE in ${NETWORK_INTERFACES}; do	
-		if ip link | grep -Fq ${NETWORK_INTERFACE}; then :; else
-			echo_color 3 "waiting for ${NETWORK_INTERFACE} to settle..."
-			wait_on "ip link | grep -Fq ${NETWORK_INTERFACE}"
-		fi
-		ifplugd -I -F -i ${NETWORK_INTERFACE} -r /etc/busyrc/ifplugd.action
+	for netif in ${NETWORK_INTERFACES}; do
+		try_ifplugd "${netif}" &
 	done
 }

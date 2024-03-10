@@ -82,6 +82,10 @@ wait_on() {
 	return 1
 }
 
+netif_exists() {
+	[ -d "/sys/class/net/${1}" ]
+}
+
 on_boot() {
 	# mount the API filesystem
 	# /proc, /sys, /run, /dev, /run/lock, /dev/pts, /dev/shm

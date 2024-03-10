@@ -1,11 +1,15 @@
 
+try_udhcpc() {
+	echo_color 3 "waiting for interface ${1}..."
+	# TODO: Might want to wait for specific operstate "up" or "unknown" rather than just existing
+	wait_on "netif_exists ${1}"
+	echo_color 3 "interface ${1} is available, starting udhcpc for it"
+	udhcpc -i ${1} -n -q -S -s /etc/busyrc/udhcpc.script
+}
+
 udhcpc_start() {
-	for NETWORK_INTERFACE in ${NETWORK_INTERFACES}; do	
-		if ip link | grep -Fq ${NETWORK_INTERFACE}; then :; else
-			echo_color 3 "waiting for ${NETWORK_INTERFACE} to settle..."
-			wait_on "ip link | grep -Fq ${NETWORK_INTERFACE}"
-		fi
-		udhcpc -i ${NETWORK_INTERFACE} -n -q -S -s /etc/busyrc/udhcpc.script
+	for netif in ${NETWORK_INTERFACES}; do
+		try_udhcpc "${netif}" &
 	done
 }
 
