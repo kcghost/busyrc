@@ -29,11 +29,16 @@ Installing on Ubuntu or most normal Linux distributions
 
 Dependencies: busybox, optionally eudev or systemd (for udev)
 ```
-sudo apt install busybox busybox-syslogd
+sudo apt install busybox-static busybox-syslogd
+#OR
+sudo apt install busybox busybox-syslogd udhcpc
 
 sudo make install-conf
 sudo make install
 ```
+
+If available choose `busybox-static` over `busybox`.
+The static build provides its utilties as built-ins when running the busybox `ash` shell without needing PATH lookups.
 
 Note that the true init on most Linux distributions is actually in initrd.
 Usually a script in initrd will execute some traditional init, *probably* `/sbin/init`. 
