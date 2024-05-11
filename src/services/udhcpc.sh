@@ -1,9 +1,9 @@
 
 try_udhcpc() {
 	echo_color 3 "waiting for interface ${1}..."
-	# TODO: Might want to wait for specific operstate "up" or "unknown" rather than just existing
-	wait_on "netif_exists ${1}"
-	echo_color 3 "interface ${1} is available, starting udhcpc for it"
+	# Keep trying for 100 seconds, wifi might be pretty slow to get started
+	wait_on "netif_up ${1}" 1000
+	echo_color 3 "interface ${1} is up, starting udhcpc for it"
 	udhcpc -i ${1} -n -q -S -s /etc/busyrc/udhcpc.script
 }
 

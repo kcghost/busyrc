@@ -86,6 +86,16 @@ netif_exists() {
 	[ -d "/sys/class/net/${1}" ]
 }
 
+netif_up() {
+	if [ -d "/sys/class/net/${1}" ]; then
+		operstate=$(cat "/sys/class/net/${1}/operstate")
+		if [ "${operstate}" == "up" ] || [ "${operstate}" == "unknown" ]; then
+			return 0
+		fi
+	fi
+	return 1
+}
+
 on_boot() {
 	# mount the API filesystem
 	# /proc, /sys, /run, /dev, /run/lock, /dev/pts, /dev/shm
